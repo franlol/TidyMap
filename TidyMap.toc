@@ -19,6 +19,8 @@ Locales\Locale.lua
 Locales\esES.lua
 Core.lua
 Map.lua
+Elements.lua
+Edit.lua
 Zoom.lua
 Icon.lua
 Options.lua

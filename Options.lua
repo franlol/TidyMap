@@ -1,7 +1,10 @@
 -------------------------------------------------------------------------------
 -- TidyMap - Options window (LibFlatyUI-1.0)
 --
---   Look     : styles (one click), shape, border, glow
+--   Look     : on / off, styles (one click), corners, border, glow
+--   Icons    : Blizzard's icons around the map: clean mode, shown / on
+--              hover / hidden, place on the edge (also by dragging them
+--              on the map while this window is open)
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
 -- Every change shows at once on the real minimap. Options that do not
@@ -79,6 +82,99 @@ local function BuildLook(container)
 end
 
 -------------------------------------------------------------------------------
+-- Icons: Blizzard's icons around the map. A list on the left, the picked
+-- one on the right. With the window open they can also be dragged on the
+-- map, or clicked to pick them here.
+-------------------------------------------------------------------------------
+ns.selected = ns.selected or "zone"
+
+local MODES = function()
+    return { { "show", L["Show"] }, { "hover", L["On hover"] }, { "hide", L["Hide"] } }
+end
+local MODE_TAG = {
+    show = function() return L["Shown"], UI.theme.success end,
+    hover = function() return L["On hover"], ns.ACCENT end,
+    hide = function() return L["Hidden"], UI.theme.muted end,
+}
+
+local function Sel() return ns.P.elements[ns.selected] end
+local function ElementName(key)
+    for _, e in ipairs(ns.ELEMENTS) do
+        if e.key == key then return L[e.name] end
+    end
+    return key
+end
+local function ApplySel() ns.ApplyElement(ns.selected) end
+
+local function BuildIcons(container)
+    local left, right = UI.Split(container, 210)
+
+    local card = left:Add(1, UI.Card(left.content, L["Clean mode"],
+        L["Shown icons only appear with the mouse over the map."]))
+    card:Add(UI.Switch(card, L["Clean mode"], function() return ns.P.clean end, function(v)
+        ns.P.clean = v
+        ns.ApplyAll()
+    end, { enableIf = On }))
+
+    card = left:Add(1, UI.Card(left.content, L["Icons"]))
+    card:Add(UI.List(card, {
+        items = function() return ns.ELEMENTS end,
+        label = function(e) return L[e.name] end,
+        tag = function(e) return MODE_TAG[ns.ElementMode(e.key)]() end,
+        selected = function(e) return e.key == ns.selected end,
+        onSelect = function(_, e) ns.selected = e.key UI.RefreshAll() end,
+        rows = #ns.ELEMENTS,
+        enableIf = On,
+    }))
+
+    card = right:Add(1, UI.Card(right.content, ElementName(ns.selected)))
+    local title = card
+    card:Add(UI.Segmented(card, L["Show"], MODES(), function() return Sel().mode end, function(v)
+        Sel().mode = v
+        ApplySel()
+    end, { enableIf = On }))
+    local placed = Both(On, function() return Sel().mode ~= "hide" end)
+    card:Add(UI.Slider(card, L["Angle"], 0, 359, 1, function() return Sel().angle end, function(v)
+        Sel().angle = v
+        ApplySel()
+    end, { format = function(v) return ("%d°"):format(v) end, enableIf = placed }))
+    card:Add(UI.Slider(card, L["Distance"], -20, 40, 1, function() return Sel().dist end, function(v)
+        Sel().dist = v
+        ApplySel()
+    end, { format = UI.px, enableIf = placed }))
+    card:Add(UI.Buttons(card, {
+        { L["Reset position"], function()
+            local d = ns.defaults.elements[ns.selected]
+            Sel().angle, Sel().dist = d.angle, d.dist
+            ApplySel()
+            UI.RefreshAll()
+        end },
+    }, { enableIf = placed }))
+
+    card = right:Add(1, UI.Card(right.content, L["All icons"]))
+    card:Add(UI.Buttons(card, {
+        { L["Reset all icons"], function()
+            for key, d in pairs(ns.defaults.elements) do
+                local t = ns.P.elements[key]
+                t.mode, t.angle, t.dist = d.mode, d.angle, d.dist
+            end
+            ns.ApplyAll()
+            UI.RefreshAll()
+        end, "danger", confirm = true },
+    }, { enableIf = On }))
+
+    -- the card's title follows the picked icon
+    local paint = UI.OnRefresh
+    UI.OnRefresh = function()
+        if paint then paint() end
+        title.title:SetText(ElementName(ns.selected))
+    end
+
+    left:Layout()
+    right:Layout()
+end
+
+-------------------------------------------------------------------------------
 -- Map
 -------------------------------------------------------------------------------
 local function Rebuild()
@@ -106,6 +202,8 @@ local function BuildMap(container)
     card:Add(UI.Slider(card, L["After"], 3, 60, 1, g, s, { sub = true,
         format = function(v) return ("%d s"):format(v) end,
         enableIf = Both(On, function() return ns.P.zoom.auto end) }))
+    g, s = Bind("zoom", "buttons")
+    card:Add(UI.Check(card, L["Zoom buttons on hover"], g, s, { enableIf = On }))
 
     card = page:Add(2, UI.Card(page.content, "TidyMap"))
     card:Add(UI.Check(card, L["Minimap icon"], function() return not ns.db.icon.hide end, function(v)
@@ -184,11 +282,15 @@ local function Build()
     win = UI.Window({ name = "TidyMapOptions", title = "TidyMap", version = ns.version,
         logo = "Interface\\AddOns\\TidyMap\\Media\\Icon", width = 640, height = 470, navWidth = 110 })
     win:AddNav("look", L["Look"], BuildLook)
+    win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("map", L["Map"], BuildMap)
     win:AddNav("profiles", L["Profiles"], BuildProfiles)
     UI.OnRefresh = function()
         win:SetSubtitle(L["Profile: %s"]:format(ns.profileName or ""))
     end
+    -- while the window is open, the icons can be dragged on the map
+    win:HookScript("OnShow", function() ns.SetEditing(true) end)
+    win:HookScript("OnHide", function() ns.SetEditing(false) end)
     win:Select("look")
 end
 
@@ -199,4 +301,13 @@ function ns.ToggleOptions()
         return
     end
     win:Toggle()
+end
+
+-- An icon clicked or dragged on the map: its settings
+function ns.SelectElement(key)
+    ns.selected = key
+    if not win then Build() end
+    if not win:IsShown() then win:Show() end
+    win:Select("icons")
+    UI.RefreshAll()
 end

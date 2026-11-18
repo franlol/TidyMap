@@ -36,17 +36,6 @@ ns.ELEMENTS = {
 local BY_KEY = {}
 for _, e in ipairs(ns.ELEMENTS) do BY_KEY[e.key] = e end
 
--- default place: angle (0 right, 90 up) and distance past the edge
-ns.ELEMENT_DEFAULTS = {
-    zone = { mode = "show", angle = 90, dist = 12 },
-    clock = { mode = "show", angle = 270, dist = 10 },
-    calendar = { mode = "show", angle = 42, dist = 0 },
-    tracking = { mode = "show", angle = 138, dist = 0 },
-    mail = { mode = "show", angle = 162, dist = 0 },
-    compartment = { mode = "show", angle = 20, dist = 0 },
-    daynight = { mode = "show", angle = 64, dist = 0 },
-}
-
 local saved = {}       -- [frame] = Blizzard's own points and mouse
 local editing = false  -- the options window is open: every icon visible
 local alpha = 0        -- current alpha of the "on hover" icons
@@ -200,11 +189,8 @@ local function Start()
     f:RegisterEvent("ADDON_LOADED")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
     f:SetScript("OnEvent", function(_, event, name)
-        if event == "PLAYER_ENTERING_WORLD" or name == "Blizzard_TimeManager" then
-            Again()
-            -- elements that were not there at the first apply (the clock)
-            if not On() then Apply() end
-        end
+        -- the clock exists once its addon loads
+        if event == "PLAYER_ENTERING_WORLD" or name == "Blizzard_TimeManager" then Apply() end
     end)
 end
 

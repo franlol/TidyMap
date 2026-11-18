@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- TidyMap - Minimap icon (optional): click opens the options, drag moves
--- it along the edge of the map. It follows the map's shape: a circle for a
--- round map, the edge of the square for the others.
+-- it along the edge of the map. It follows the map's shape and corners.
 -------------------------------------------------------------------------------
 
 local _, ns = ...
+local Flaty = LibStub("LibFlatyUI-1.0")
 
 local SIZE = 24
 local btn = CreateFrame("Button", "TidyMapIcon", Minimap)
@@ -19,16 +19,13 @@ icon:SetAllPoints()
 local atan2 = math.atan2 or atan2
 
 local function Place()
-    local a = math.rad(ns.db.icon.angle)
-    local c, s = math.cos(a), math.sin(a)
-    local half = Minimap:GetWidth() / 2
-    local round = GetMinimapShape() == "ROUND"
-    -- on the edge of the map: the circle, or the square (the longer side
-    -- of the direction reaches the edge first)
-    local r = round and half or half / math.max(math.abs(c), math.abs(s))
+    -- on the edge of the map's shape (Blizzard's round map when TidyMap is off)
+    local corners = ns.P.enabled and ns.P.corners or 100
+    local x, y = Flaty.ShapeEdge(Flaty.Rounded(corners), ns.db.icon.angle,
+        Minimap:GetWidth() / 2, Minimap:GetHeight() / 2, 0)
     btn:ClearAllPoints()
-    btn:SetPoint("CENTER", Minimap, "CENTER", c * r, s * r)
-    icon:SetTexture(round and "Interface\\AddOns\\TidyMap\\Media\\IconRound"
+    btn:SetPoint("CENTER", Minimap, "CENTER", x, y)
+    icon:SetTexture(corners >= 50 and "Interface\\AddOns\\TidyMap\\Media\\IconRound"
         or "Interface\\AddOns\\TidyMap\\Media\\Icon")
 end
 

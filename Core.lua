@@ -24,7 +24,19 @@ ns.defaults = {
     corners = 8,        -- 0 square ... 100 round (%)
     border = { size = 1, color = C(0, 0, 0, 1), class = false },
     glow = { on = false, color = C(0.96, 0.72, 0.32, 0.6) },
-    zoom = { auto = true, delay = 10 },
+    zoom = { auto = true, delay = 10, buttons = true },
+    clean = false,      -- every shown icon only on hover
+    -- Blizzard's icons: shown / on hover / hidden, angle on the edge
+    -- (0 right, 90 up) and distance past the edge (px)
+    elements = {
+        zone = { mode = "show", angle = 90, dist = 12 },
+        clock = { mode = "show", angle = 270, dist = 10 },
+        calendar = { mode = "show", angle = 42, dist = 0 },
+        tracking = { mode = "show", angle = 138, dist = 0 },
+        mail = { mode = "show", angle = 162, dist = 0 },
+        compartment = { mode = "show", angle = 20, dist = 0 },
+        daynight = { mode = "show", angle = 64, dist = 0 },
+    },
 }
 
 local ACCOUNT = {

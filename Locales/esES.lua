@@ -39,8 +39,33 @@ ns.translations.esES = {
     ["Class color"] = "Color de clase",
     ["Color"] = "Color",
 
+    -- Icons
+    ["Icons"] = "Iconos",
+    ["Clean mode"] = "Modo limpio",
+    ["Shown icons only appear with the mouse over the map."] =
+        "Los iconos visibles solo aparecen con el ratón sobre el mapa.",
+    ["Show"] = "Mostrar",
+    ["On hover"] = "Al pasar",
+    ["Hide"] = "Ocultar",
+    ["Shown"] = "Visible",
+    ["Hidden"] = "Oculto",
+    ["Angle"] = "Ángulo",
+    ["Distance"] = "Distancia",
+    ["Reset position"] = "Restablecer posición",
+    ["All icons"] = "Todos los iconos",
+    ["Reset all icons"] = "Restablecer todos los iconos",
+    ["Drag along the edge · Click for its settings"] = "Arrastra por el borde · Clic para sus opciones",
+    ["Zone"] = "Zona",
+    ["Clock"] = "Reloj",
+    ["Calendar"] = "Calendario",
+    ["Tracking"] = "Rastreo",
+    ["Mail"] = "Correo",
+    ["Addon menu"] = "Menú de addons",
+    ["Day / night"] = "Día / noche",
+
     -- Map
     ["Zoom"] = "Zoom",
+    ["Zoom buttons on hover"] = "Botones de zoom al pasar",
     ["After you zoom in with the mouse wheel, the map zooms back out by itself."] =
         "Tras acercar el mapa con la rueda del ratón, vuelve a alejarse solo.",
     ["Zoom back out"] = "Volver a alejar",
