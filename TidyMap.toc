@@ -1,0 +1,24 @@
+## Interface: 16001
+## Title: TidyMap
+## Notes: A clean, shaped minimap: square, round or rounded, with a flat border and glow.
+## Notes-esES: Un minimapa limpio y con forma: cuadrado, redondo o redondeado, con borde plano y brillo.
+## Notes-esMX: Un minimapa limpio y con forma: cuadrado, redondo o redondeado, con borde plano y brillo.
+## Author: franlol
+## X-License: MIT
+## Version: @project-version@
+## IconTexture: Interface\AddOns\TidyMap\Media\Icon
+## SavedVariables: TidyMapDB
+## AddonCompartmentFunc: TidyMap_OnCompartmentClick
+## AddonCompartmentFuncOnEnter: TidyMap_OnCompartmentEnter
+## AddonCompartmentFuncOnLeave: TidyMap_OnCompartmentLeave
+
+Libs\LibStub\LibStub.lua
+Libs\LibFlatyUI-1.0\LibFlatyUI-1.0.lua
+
+Locales\Locale.lua
+Locales\esES.lua
+Core.lua
+Map.lua
+Zoom.lua
+Icon.lua
+Options.lua

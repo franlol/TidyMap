@@ -1,0 +1,10 @@
+package-as: TidyMap
+
+externals:
+  Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
+  Libs/LibFlatyUI-1.0:
+    url: https://github.com/franlol/LibFlatyUI-1.0
+    tag: latest
+
+ignore:
+  - README.md
