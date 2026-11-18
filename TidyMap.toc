@@ -21,6 +21,7 @@ Core.lua
 Map.lua
 Elements.lua
 Texts.lua
+Buttons.lua
 Edit.lua
 Zoom.lua
 Icon.lua

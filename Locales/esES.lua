@@ -76,6 +76,16 @@ ns.translations.esES = {
     ["Thick"] = "Grueso",
     ["Bar behind the name"] = "Barra tras el nombre",
 
+    -- Addons
+    ["Addons"] = "Addons",
+    ["Addon buttons"] = "Botones de addons",
+    ["Flat look"] = "Aspecto plano",
+    ["No round border or background."] = "Sin borde redondo ni fondo.",
+    ["Into the addon menu"] = "Al menú de addons",
+    ["Checked buttons leave the map and wait in the addon menu."] =
+        "Los botones marcados salen del mapa y esperan en el menú de addons.",
+    ["No addon buttons on the map."] = "No hay botones de addons en el mapa.",
+
     -- Map
     ["Zoom"] = "Zoom",
     ["Zoom buttons on hover"] = "Botones de zoom al pasar",

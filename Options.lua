@@ -6,6 +6,7 @@
 --              hover / hidden, place on the edge (also by dragging them
 --              on the map while this window is open)
 --   Texts    : font and outline, sizes of zone, clock and coordinates
+--   Addons   : other addons' minimap buttons: flat look, into the addon menu
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
 -- Every change shows at once on the real minimap. Options that do not
@@ -217,6 +218,38 @@ local function BuildTexts(container)
 end
 
 -------------------------------------------------------------------------------
+-- Addons: other addons' minimap buttons (LibDBIcon)
+-------------------------------------------------------------------------------
+local function BuildAddons(container)
+    local page = UI.Page(container, 2)
+    local has = Both(On, ns.HasAddonButtons)
+
+    local card = page:Add(1, UI.Card(page.content, L["Addon buttons"]))
+    local g, s = Bind("buttons", "flat")
+    card:Add(UI.Check(card, L["Flat look"], g, s, { enableIf = has,
+        tip = L["No round border or background."] }))
+
+    card = page:Add(2, UI.Card(page.content, L["Into the addon menu"],
+        L["Checked buttons leave the map and wait in the addon menu."]))
+    card:Add(UI.List(card, {
+        items = ns.AddonButtons,
+        label = function(b) return b.name end,
+        lead = "icon",
+        icon = function(b) return b.icon or 134400 end,
+        checked = function(b) return ns.P.buttons.menu[b.name] and true or false end,
+        onCheck = function(b, v)
+            ns.P.buttons.menu[b.name] = v or nil
+            ns.ApplyAll()
+        end,
+        rows = 9,
+        empty = L["No addon buttons on the map."],
+        enableIf = has,
+    }))
+
+    page:Layout()
+end
+
+-------------------------------------------------------------------------------
 -- Map
 -------------------------------------------------------------------------------
 local function Rebuild()
@@ -326,6 +359,7 @@ local function Build()
     win:AddNav("look", L["Look"], BuildLook)
     win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("texts", L["Texts"], BuildTexts)
+    win:AddNav("addons", L["Addons"], BuildAddons)
     win:AddNav("map", L["Map"], BuildMap)
     win:AddNav("profiles", L["Profiles"], BuildProfiles)
     UI.OnRefresh = function()

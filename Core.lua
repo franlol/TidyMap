@@ -45,6 +45,9 @@ ns.defaults = {
         zone = 12, clock = 12, coords = 10,
         zoneBar = false,    -- Blizzard's bar behind the zone name
     },
+    -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
+    -- moved into the addon menu ([name] = true)
+    buttons = { flat = true, menu = {} },
 }
 
 local ACCOUNT = {
