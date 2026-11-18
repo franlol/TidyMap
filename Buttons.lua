@@ -22,7 +22,7 @@ local function ApplyButton(dbi, name)
     local on = On()
     local P = ns.P.buttons
 
-    if on and P.menu[name] then
+    if on and P.menu[name] and dbi.AddButtonToCompartment then
         dbi:AddButtonToCompartment(name)
         dbi:Hide(name)
         inMenu[name] = true
@@ -32,14 +32,17 @@ local function ApplyButton(dbi, name)
         inMenu[name] = nil
     end
 
-    if on and P.flat then
-        dbi:RemoveButtonBorder(name)
-        dbi:RemoveButtonBackground(name)
-        flat[name] = true
-    elseif flat[name] then
-        dbi:ResetButtonBorder(name)
-        dbi:ResetButtonBackground(name)
-        flat[name] = nil
+    -- (older LibDBIcon copies, before about v55, have no border functions)
+    if dbi.RemoveButtonBorder then
+        if on and P.flat then
+            dbi:RemoveButtonBorder(name)
+            dbi:RemoveButtonBackground(name)
+            flat[name] = true
+        elseif flat[name] then
+            dbi:ResetButtonBorder(name)
+            dbi:ResetButtonBackground(name)
+            flat[name] = nil
+        end
     end
 
     if on and ns.P.clean then
@@ -70,6 +73,12 @@ function ns.AddonButtons()
 end
 
 function ns.HasAddonButtons() return DBI() ~= nil end
+
+-- The running LibDBIcon can remove the round border (newer copies)
+function ns.CanFlattenButtons()
+    local dbi = DBI()
+    return dbi and dbi.RemoveButtonBorder and true or false
+end
 
 -- New buttons (addons that load later) get the same treatment
 local listening = false

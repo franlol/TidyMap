@@ -226,7 +226,7 @@ local function BuildAddons(container)
 
     local card = page:Add(1, UI.Card(page.content, L["Addon buttons"]))
     local g, s = Bind("buttons", "flat")
-    card:Add(UI.Check(card, L["Flat look"], g, s, { enableIf = has,
+    card:Add(UI.Check(card, L["Flat look"], g, s, { enableIf = Both(has, ns.CanFlattenButtons),
         tip = L["No round border or background."] }))
 
     card = page:Add(2, UI.Card(page.content, L["Into the addon menu"],
