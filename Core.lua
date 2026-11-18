@@ -27,23 +27,23 @@ ns.defaults = {
     zoom = { auto = true, delay = 10, buttons = true },
     clean = false,      -- every shown icon only on hover
     -- Blizzard's icons: shown / on hover / hidden, angle on the edge
-    -- (0 right, 90 up) and distance past the edge (px)
+    -- (0 right, 90 up), distance past the edge (px), look (Blizzard's art
+    -- or flat) and size (% of Blizzard's)
     elements = {
-        zone = { mode = "show", angle = 90, dist = 12 },
-        clock = { mode = "show", angle = 270, dist = 10 },
-        calendar = { mode = "show", angle = 42, dist = 0 },
-        tracking = { mode = "show", angle = 138, dist = 0 },
-        mail = { mode = "show", angle = 162, dist = 0 },
-        compartment = { mode = "show", angle = 20, dist = 0 },
-        daynight = { mode = "show", angle = 64, dist = 0 },
-        coords = { mode = "show", angle = 270, dist = -14 },
+        zone = { mode = "show", angle = 90, dist = 12, look = "flat", size = 100 },
+        clock = { mode = "show", angle = 270, dist = 10, look = "flat", size = 100 },
+        calendar = { mode = "show", angle = 42, dist = 0, look = "flat", size = 100 },
+        tracking = { mode = "show", angle = 138, dist = 0, look = "flat", size = 100 },
+        mail = { mode = "show", angle = 162, dist = 0, look = "flat", size = 100 },
+        compartment = { mode = "show", angle = 20, dist = 0, look = "flat", size = 100 },
+        daynight = { mode = "show", angle = 64, dist = 0, look = "flat", size = 100 },
+        coords = { mode = "show", angle = 270, dist = -14, look = "flat", size = 100 },
     },
     -- the texts on and around the map: one font, a size each
     texts = {
         font = LibStub("LibFlatyUI-1.0").Media("font", "Flaty: Inter"),
         outline = "",
         zone = 12, clock = 12, coords = 10,
-        zoneBar = false,    -- Blizzard's bar behind the zone name
     },
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true)

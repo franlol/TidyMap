@@ -53,7 +53,8 @@ ns.translations.esES = {
     ["Hidden"] = "Oculto",
     ["Angle"] = "Ángulo",
     ["Distance"] = "Distancia",
-    ["Reset position"] = "Restablecer posición",
+    ["Reset this icon"] = "Restablecer este icono",
+    ["Flat"] = "Plano",
     ["All icons"] = "Todos los iconos",
     ["Reset all icons"] = "Restablecer todos los iconos",
     ["Drag along the edge · Click for its settings"] = "Arrastra por el borde · Clic para sus opciones",
@@ -74,7 +75,6 @@ ns.translations.esES = {
     ["Outline"] = "Contorno",
     ["Thin"] = "Fino",
     ["Thick"] = "Grueso",
-    ["Bar behind the name"] = "Barra tras el nombre",
 
     -- Addons
     ["Addons"] = "Addons",

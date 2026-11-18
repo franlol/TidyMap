@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- TidyMap - Texts: Blizzard's zone name, clock and coordinates in one font
--- (a size each), and the bar behind the zone name.
+-- (a size each). The bar behind the zone name is the zone icon's look.
 -- Blizzard keeps writing and coloring them (the zone color tells PvP);
 -- TidyMap only sets the font. Turned off, they get Blizzard's fonts back.
 --
@@ -38,15 +38,6 @@ local function Restore(fs)
     if s.file then fs:SetFont(s.file, s.size, s.flags or "") end
 end
 
-local barAlpha   -- Blizzard's own, kept before the first change
-local function ZoneBar(shown)
-    local b = MinimapCluster.ZoneTextButton
-    local t = b and b.StateTexture
-    if not t then return end
-    barAlpha = barAlpha or t:GetAlpha()
-    t:SetAlpha(shown and barAlpha or 0)
-end
-
 local function Apply()
     local t = ns.P.texts
     for _, x in ipairs(TEXTS) do
@@ -60,7 +51,6 @@ local function Apply()
             end
         end
     end
-    ZoneBar(not On() or t.zoneBar)
 end
 
 local function Start()

@@ -57,6 +57,14 @@ local function ClassColor()
     if c then return { c.r, c.g, c.b, 1 } end
 end
 
+-- The map's border color { r, g, b, a } (class color if set); nil when the
+-- map has no border. Flat icons use it too.
+function ns.BorderColor()
+    local b = ns.P.border
+    if not On() or b.size <= 0 then return nil end
+    return b.class and ClassColor() or { b.color.r, b.color.g, b.color.b, b.color.a or 1 }
+end
+
 local function Apply()
     ApplyMask()
     if not On() then

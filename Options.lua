@@ -136,6 +136,15 @@ local function BuildIcons(container)
         ApplySel()
     end, { enableIf = On }))
     local placed = Both(On, function() return Sel().mode ~= "hide" end)
+    card:Add(UI.Segmented(card, L["Look"], { { "flat", L["Flat"] }, { "blizzard", "Blizzard" } },
+        function() return Sel().look end, function(v)
+            Sel().look = v
+            ApplySel()
+        end, { enableIf = placed }))
+    card:Add(UI.Slider(card, L["Size"], 50, 200, 5, function() return Sel().size end, function(v)
+        Sel().size = v
+        ApplySel()
+    end, { format = Pct, enableIf = placed }))
     card:Add(UI.Slider(card, L["Angle"], 0, 359, 1, function() return Sel().angle end, function(v)
         Sel().angle = v
         ApplySel()
@@ -145,20 +154,20 @@ local function BuildIcons(container)
         ApplySel()
     end, { format = UI.px, enableIf = placed }))
     card:Add(UI.Buttons(card, {
-        { L["Reset position"], function()
+        { L["Reset this icon"], function()
             local d = ns.defaults.elements[ns.selected]
-            Sel().angle, Sel().dist = d.angle, d.dist
+            Sel().angle, Sel().dist, Sel().look, Sel().size = d.angle, d.dist, d.look, d.size
             ApplySel()
             UI.RefreshAll()
         end },
-    }, { enableIf = placed }))
+    }, { enableIf = On }))
 
     card = right:Add(1, UI.Card(right.content, L["All icons"]))
     card:Add(UI.Buttons(card, {
         { L["Reset all icons"], function()
             for key, d in pairs(ns.defaults.elements) do
                 local t = ns.P.elements[key]
-                t.mode, t.angle, t.dist = d.mode, d.angle, d.dist
+                t.mode, t.angle, t.dist, t.look, t.size = d.mode, d.angle, d.dist, d.look, d.size
             end
             ns.ApplyAll()
             UI.RefreshAll()
@@ -203,8 +212,6 @@ local function BuildTexts(container)
 
     card = page:Add(2, UI.Card(page.content, L["Zone"]))
     card:Add(SizeSlider(card, "zone"))
-    g, s = Bind("texts", "zoneBar")
-    card:Add(UI.Check(card, L["Bar behind the name"], g, s, { enableIf = On }))
 
     card = page:Add(2, UI.Card(page.content, L["Clock"]))
     card:Add(SizeSlider(card, "clock"))

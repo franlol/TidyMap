@@ -13,27 +13,43 @@
 local _, ns = ...
 local Flaty = LibStub("LibFlatyUI-1.0")
 
+-- Blizzard's ring around the day / night icon
+local function DielRing(f)
+    for _, r in ipairs({ f:GetRegions() }) do
+        local atlas = r.GetAtlas and r:GetAtlas()
+        if atlas and atlas:lower() == "ui-hud-minimap-frame-cycle" then return { r } end
+    end
+    return {}
+end
+
 -- key, name, the frame (it may not exist yet), the buttons inside it that
--- take the mouse
+-- take the mouse, its text (text pieces: the flat look fits the text) and
+-- Blizzard's decoration that the flat look hides
 ns.ELEMENTS = {
     { key = "zone", name = "Zone",
-        frame = function() return MinimapCluster.ZoneTextButton end },
+        frame = function() return MinimapCluster.ZoneTextButton end,
+        text = function() return MinimapZoneText end,
+        decor = function(f) return { f.StateTexture } end },
     { key = "clock", name = "Clock",
-        frame = function() return TimeManagerClockButton end },
+        frame = function() return TimeManagerClockButton end,
+        text = function() return TimeManagerClockTicker end },
     { key = "calendar", name = "Calendar",
         frame = function() return GameTimeFrame end },
     { key = "tracking", name = "Tracking",
         frame = function() return MinimapCluster.Tracking end,
-        buttons = function(f) return { f.Button } end },
+        buttons = function(f) return { f.Button } end,
+        decor = function(f) return { f.Background } end },
     { key = "mail", name = "Mail",
         frame = function() return MinimapCluster.IndicatorFrame end,
         buttons = function(f) return { f.MailFrame } end },
     { key = "compartment", name = "Addon menu",
         frame = function() return AddonCompartmentFrame end },
     { key = "daynight", name = "Day / night",
-        frame = function() return MinimapCluster.DielFrame end },
+        frame = function() return MinimapCluster.DielFrame end,
+        decor = DielRing },
     { key = "coords", name = "Coordinates",
-        frame = function() return MinimapCluster.MinimapContainer.PlayerCoords end },
+        frame = function() return MinimapCluster.MinimapContainer.PlayerCoords end,
+        text = function(f) return f.CoordText end },
 }
 local BY_KEY = {}
 for _, e in ipairs(ns.ELEMENTS) do BY_KEY[e.key] = e end
@@ -60,15 +76,77 @@ local function Save(f)
     if saved[f] then return end
     local points = {}
     for i = 1, f:GetNumPoints() do points[i] = { f:GetPoint(i) } end
-    saved[f] = { points = points, mouse = f:IsMouseEnabled(), alpha = f:GetAlpha() }
+    saved[f] = { points = points, mouse = f:IsMouseEnabled(), alpha = f:GetAlpha(), scale = f:GetScale() }
 end
 
 local function Restore(f)
     local s = saved[f]
     if not s then return end
+    f:SetScale(s.scale or 1)
     f:ClearAllPoints()
     for _, p in ipairs(s.points) do f:SetPoint(unpack(p)) end
     f:SetAlpha(s.alpha or 1)
+end
+
+-------------------------------------------------------------------------------
+-- Look: Blizzard's art, or flat: a dark plate in the map's corner shape
+-- with a thin border in the map's border color, under Blizzard's icon (two
+-- textures added to the icon, so they fade and scale with it). Blizzard's
+-- decoration (the tracking disc, the day / night ring, the zone bar) fades.
+-------------------------------------------------------------------------------
+local plates = {}       -- [frame] = { bg, edge }
+local decorAlpha = {}   -- [texture] = Blizzard's own alpha
+
+local function Decor(e, f, shown)
+    if not e.decor then return end
+    for _, t in ipairs(e.decor(f)) do
+        if t then
+            decorAlpha[t] = decorAlpha[t] or t:GetAlpha()
+            t:SetAlpha(shown and decorAlpha[t] or 0)
+        end
+    end
+end
+
+local function PaintPlate(e, f, flat)
+    local p = plates[f]
+    if not flat then
+        if p then p.bg:Hide() p.edge:Hide() end
+        return
+    end
+    if not p then
+        p = { edge = f:CreateTexture(nil, "BACKGROUND", nil, -8), bg = f:CreateTexture(nil, "BACKGROUND", nil, -7) }
+        plates[f] = p
+    end
+    -- the size of the text for text pieces, of the icon for the rest
+    local w, h, anchor
+    local text = e.text and e.text(f)
+    if text then
+        local tw = text:GetStringWidth() or 0
+        if tw < 1 then
+            p.bg:Hide() p.edge:Hide()
+            return
+        end
+        w, h, anchor = tw + 12, (text:GetStringHeight() or 10) + 6, text
+    else
+        local fw, fh = f:GetSize()
+        w, h, anchor = fw + 4, fh + 4, f
+    end
+    local mask = Flaty.GetShape(Flaty.Rounded(ns.P.corners)).mask
+    p.bg:SetTexture(mask)
+    p.bg:SetVertexColor(0.05, 0.05, 0.06, 0.9)
+    p.bg:SetSize(w, h)
+    p.bg:ClearAllPoints()
+    p.bg:SetPoint("CENTER", anchor, "CENTER")
+    p.bg:Show()
+    local c = ns.BorderColor()
+    p.edge:SetShown(c ~= nil)
+    if c then
+        p.edge:SetTexture(mask)
+        p.edge:SetVertexColor(c[1], c[2], c[3], c[4])
+        p.edge:SetSize(w + 2, h + 2)
+        p.edge:ClearAllPoints()
+        p.edge:SetPoint("CENTER", anchor, "CENTER")
+    end
 end
 
 local function SetMouse(e, f, on)
@@ -114,11 +192,17 @@ local function ApplyOne(e)
     if not f then return end
     Save(f)
     if On() then
+        local s = ns.P.elements[e.key]
+        f:SetScale((saved[f].scale or 1) * (s.size or 100) / 100)
         Place(e, f)
         Paint(e, f)
+        Decor(e, f, s.look ~= "flat")
+        PaintPlate(e, f, s.look == "flat")
     else
         Restore(f)
         SetMouse(e, f, true)
+        Decor(e, f, true)
+        PaintPlate(e, f, false)
     end
     if ns.OnElementPlaced then ns.OnElementPlaced(e.key, f) end
 end
@@ -196,6 +280,14 @@ local function Start()
     f:SetScript("OnEvent", function(_, event, name)
         -- the clock exists once its addon loads
         if event == "PLAYER_ENTERING_WORLD" or name == "Blizzard_TimeManager" then Apply() end
+    end)
+    -- flat look under texts (zone, clock, coordinates): it follows the text
+    C_Timer.NewTicker(1, function()
+        if not On() then return end
+        for _, e in ipairs(ns.ELEMENTS) do
+            local f = e.text and e.frame()
+            if f and ns.P.elements[e.key].look == "flat" then PaintPlate(e, f, true) end
+        end
     end)
 end
 
