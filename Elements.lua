@@ -66,11 +66,27 @@ function ns.ElementFrame(key)
 end
 
 -- Effective mode: Clean mode turns "show" into "hover"
-function ns.ElementMode(key)
-    local m = ns.P.elements[key].mode
+-- Clean mode turns "show" into "hover" (icons and header pieces alike)
+function ns.EffectiveMode(m)
     if m == "show" and ns.P.clean then return "hover" end
     return m
 end
+
+-- Blizzard's zone and clock give way to TidyMap's header while it is on
+function ns.InHeader(key)
+    return (key == "zone" or key == "clock") and ns.P.header.on
+end
+
+function ns.ElementMode(key)
+    if ns.InHeader(key) then return "hide" end
+    return ns.EffectiveMode(ns.P.elements[key].mode)
+end
+
+-- Other frames that fade like the "on hover" icons (the header pieces):
+-- { frame, mode = function() return "show" / "hover" / "hide" end }
+ns.faders = {}
+function ns.HoverAlpha() return alpha end
+function ns.IsEditing() return editing end
 
 local function Save(f)
     if saved[f] then return end
@@ -222,6 +238,7 @@ ns.ApplyElements = Apply
 function ns.SetElementsEditing(on)
     editing = on and true or false
     Apply()
+    if ns.ApplyHeader then ns.ApplyHeader() end
 end
 
 -------------------------------------------------------------------------------
@@ -235,6 +252,9 @@ local function MouseNear()
     for _, e in ipairs(ns.ELEMENTS) do
         local f = e.frame()
         if f and f:IsVisible() and f:IsMouseOver() then return true end
+    end
+    for _, x in ipairs(ns.faders) do
+        if x.frame:IsVisible() and x.frame:IsMouseOver() then return true end
     end
     return false
 end
@@ -253,6 +273,9 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     for _, e in ipairs(ns.ELEMENTS) do
         local f = e.frame()
         if f and ns.ElementMode(e.key) == "hover" then f:SetAlpha(alpha) end
+    end
+    for _, x in ipairs(ns.faders) do
+        if x.mode() == "hover" then x.frame:SetAlpha(alpha) end
     end
 end)
 

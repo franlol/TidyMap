@@ -2,6 +2,8 @@
 -- TidyMap - Options window (LibFlatyUI-1.0)
 --
 --   Look     : on / off, styles (one click), corners, border, glow
+--   Header   : TidyMap's own zone name and clock: shown / on hover /
+--              hidden, place, background, colors
 --   Icons    : Blizzard's icons around the map: clean mode, shown / on
 --              hover / hidden, place on the edge (also by dragging them
 --              on the map while this window is open)
@@ -122,7 +124,10 @@ local function BuildIcons(container)
     card:Add(UI.List(card, {
         items = function() return ns.ELEMENTS end,
         label = function(e) return L[e.name] end,
-        tag = function(e) return MODE_TAG[ns.ElementMode(e.key)]() end,
+        tag = function(e)
+            if ns.InHeader(e.key) then return L["In the header"], UI.theme.muted end
+            return MODE_TAG[ns.ElementMode(e.key)]()
+        end,
         selected = function(e) return e.key == ns.selected end,
         onSelect = function(_, e) ns.selected = e.key UI.RefreshAll() end,
         rows = #ns.ELEMENTS,
@@ -131,11 +136,13 @@ local function BuildIcons(container)
 
     card = right:Add(1, UI.Card(right.content, ElementName(ns.selected)))
     local title = card
+    -- zone and clock belong to TidyMap's header while it is on
+    local free = Both(On, function() return not ns.InHeader(ns.selected) end)
     card:Add(UI.Segmented(card, L["Show"], MODES(), function() return Sel().mode end, function(v)
         Sel().mode = v
         ApplySel()
-    end, { enableIf = On }))
-    local placed = Both(On, function() return Sel().mode ~= "hide" end)
+    end, { enableIf = free }))
+    local placed = Both(free, function() return Sel().mode ~= "hide" end)
     card:Add(UI.Segmented(card, L["Look"], { { "flat", L["Flat"] }, { "blizzard", "Blizzard" } },
         function() return Sel().look end, function(v)
             Sel().look = v
@@ -183,6 +190,55 @@ local function BuildIcons(container)
 
     left:Layout()
     right:Layout()
+end
+
+-------------------------------------------------------------------------------
+-- Header: TidyMap's own zone name and clock, the same options for both
+-------------------------------------------------------------------------------
+local function HeaderOn() return ns.P.enabled and ns.P.header.on end
+
+local function PieceCard(page, col, key, title)
+    local function C() return ns.P.header[key] end
+    local function Get(k) return function() return C()[k] end end
+    local function Set(k) return function(v) C()[k] = v ns.ApplyAll() end end
+    local shown = Both(HeaderOn, function() return C().mode ~= "hide" end)
+
+    local card = page:Add(col, UI.Card(page.content, title))
+    card:Add(UI.Segmented(card, L["Show"], MODES(), Get("mode"), Set("mode"), { enableIf = HeaderOn }))
+    card:Add(UI.Segmented(card, L["Place"], { { "top", L["Top"] }, { "bottom", L["Bottom"] } },
+        Get("place"), Set("place"), { enableIf = shown }))
+    card:Add(UI.Segmented(card, L["Side"], { { "outside", L["Outside"] }, { "inside", L["Inside"] } },
+        Get("side"), Set("side"), { enableIf = shown }))
+    card:Add(UI.Slider(card, L["Distance"], -10, 40, 1, Get("offset"), Set("offset"),
+        { format = UI.px, enableIf = shown }))
+    card:Add(UI.Segmented(card, L["Background"], { { "none", L["None"] }, { "flat", L["Flat"] }, { "pill", L["Pill"] } },
+        Get("bg"), Set("bg"), { enableIf = shown }))
+    card:Add(UI.Swatch(card, L["Background color"], function() return C().bgColor end, Apply,
+        { alpha = true, sub = true, enableIf = Both(shown, function() return C().bg ~= "none" end) }))
+    if key == "zone" then
+        card:Add(UI.Check(card, L["PvP colors"], Get("pvp"), Set("pvp"), { enableIf = shown }))
+        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
+            { alpha = true, sub = true, enableIf = Both(shown, function() return not C().pvp end) }))
+    else
+        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
+            { alpha = true, enableIf = shown }))
+    end
+end
+
+local function BuildHeader(container)
+    local page = UI.Page(container, 2)
+
+    local card = page:Add(1, UI.Card(page.content, L["Header"],
+        L["TidyMap's own zone name and clock. Off: Blizzard's, on the Icons page."]))
+    card:Add(UI.Switch(card, L["TidyMap header"], function() return ns.P.header.on end, function(v)
+        ns.P.header.on = v
+        ns.ApplyAll()
+    end, { enableIf = On }))
+
+    PieceCard(page, 1, "zone", L["Zone"])
+    PieceCard(page, 2, "clock", L["Clock"])
+
+    page:Layout()
 end
 
 -------------------------------------------------------------------------------
@@ -364,6 +420,7 @@ local function Build()
     win = UI.Window({ name = "TidyMapOptions", title = "TidyMap", version = ns.version,
         logo = "Interface\\AddOns\\TidyMap\\Media\\Icon", width = 640, height = 470, navWidth = 110 })
     win:AddNav("look", L["Look"], BuildLook)
+    win:AddNav("header", L["Header"], BuildHeader)
     win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("texts", L["Texts"], BuildTexts)
     win:AddNav("addons", L["Addons"], BuildAddons)

@@ -41,6 +41,24 @@ ns.translations.esES = {
     ["Class color"] = "Color de clase",
     ["Color"] = "Color",
 
+    -- Header
+    ["Header"] = "Cabecera",
+    ["TidyMap's own zone name and clock. Off: Blizzard's, on the Icons page."] =
+        "Nombre de zona y reloj propios de TidyMap. Apagado: los de Blizzard, en la página Iconos.",
+    ["TidyMap header"] = "Cabecera de TidyMap",
+    ["Place"] = "Lugar",
+    ["Top"] = "Arriba",
+    ["Bottom"] = "Abajo",
+    ["Side"] = "Lado",
+    ["Outside"] = "Fuera",
+    ["Inside"] = "Dentro",
+    ["Background"] = "Fondo",
+    ["Pill"] = "Píldora",
+    ["Background color"] = "Color del fondo",
+    ["PvP colors"] = "Colores JcJ",
+    ["Text color"] = "Color del texto",
+    ["In the header"] = "En la cabecera",
+
     -- Icons
     ["Icons"] = "Iconos",
     ["Clean mode"] = "Modo limpio",
