@@ -36,6 +36,15 @@ ns.defaults = {
         mail = { mode = "show", angle = 162, dist = 0 },
         compartment = { mode = "show", angle = 20, dist = 0 },
         daynight = { mode = "show", angle = 64, dist = 0 },
+        coords = { mode = "show", angle = 270, dist = -14 },
+    },
+    -- the texts on and around the map: one font, a size each
+    texts = {
+        font = LibStub("LibFlatyUI-1.0").Media("font", "Flaty: Inter"),
+        outline = "",
+        zone = 12, clock = 12, coords = 10,
+        zoneBar = false,    -- Blizzard's bar behind the zone name
+        ping = true, pingSize = 12,
     },
 }
 

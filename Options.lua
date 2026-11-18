@@ -5,6 +5,8 @@
 --   Icons    : Blizzard's icons around the map: clean mode, shown / on
 --              hover / hidden, place on the edge (also by dragging them
 --              on the map while this window is open)
+--   Texts    : font and outline, sizes of zone, clock and coordinates,
+--              who pinged the map
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
 -- Every change shows at once on the real minimap. Options that do not
@@ -175,6 +177,52 @@ local function BuildIcons(container)
 end
 
 -------------------------------------------------------------------------------
+-- Texts: one font for all, a size each
+-------------------------------------------------------------------------------
+local OUTLINES = function()
+    return { { "", L["None"] }, { "OUTLINE", L["Thin"] }, { "THICKOUTLINE", L["Thick"] } }
+end
+
+local function SizeSlider(card, key, opts)
+    local g, s = Bind("texts", key)
+    opts = opts or {}
+    opts.format = UI.px
+    opts.enableIf = opts.enableIf or On
+    return UI.Slider(card, L["Size"], 8, 24, 1, g, s, opts)
+end
+
+local function BuildTexts(container)
+    local page = UI.Page(container, 2)
+
+    local card = page:Add(1, UI.Card(page.content, L["Font"], L["For every text of the map."]))
+    card:Add(UI.Dropdown(card, L["Font"], function() return UI.MediaList("font") end,
+        function() return UI.ResolveMedia(ns.P.texts.font) or ns.P.texts.font end,
+        function(v) ns.P.texts.font = v ns.ApplyAll() end, { enableIf = On }))
+    local g, s = Bind("texts", "outline")
+    card:Add(UI.Segmented(card, L["Outline"], OUTLINES(), g, s, { enableIf = On }))
+
+    card = page:Add(1, UI.Card(page.content, L["Ping"], L["Who clicked the map, in their class color."]))
+    g, s = Bind("texts", "ping")
+    card:Add(UI.Check(card, L["Show who pings"], g, s, { enableIf = On }))
+    card:Add(SizeSlider(card, "pingSize", { sub = true, enableIf = Both(On, function() return ns.P.texts.ping end) }))
+
+    card = page:Add(2, UI.Card(page.content, L["Zone"]))
+    card:Add(SizeSlider(card, "zone"))
+    g, s = Bind("texts", "zoneBar")
+    card:Add(UI.Check(card, L["Bar behind the name"], g, s, { enableIf = On }))
+
+    card = page:Add(2, UI.Card(page.content, L["Clock"]))
+    card:Add(SizeSlider(card, "clock"))
+
+    card = page:Add(2, UI.Card(page.content, L["Coordinates"]))
+    card:Add(UI.Check(card, L["Show"], function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end,
+        function(v) C_CVar.SetCVar("minimapShowPlayerCoords", v and "1" or "0") end))
+    card:Add(SizeSlider(card, "coords", { enableIf = Both(On, function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end) }))
+
+    page:Layout()
+end
+
+-------------------------------------------------------------------------------
 -- Map
 -------------------------------------------------------------------------------
 local function Rebuild()
@@ -283,6 +331,7 @@ local function Build()
         logo = "Interface\\AddOns\\TidyMap\\Media\\Icon", width = 640, height = 470, navWidth = 110 })
     win:AddNav("look", L["Look"], BuildLook)
     win:AddNav("icons", L["Icons"], BuildIcons)
+    win:AddNav("texts", L["Texts"], BuildTexts)
     win:AddNav("map", L["Map"], BuildMap)
     win:AddNav("profiles", L["Profiles"], BuildProfiles)
     UI.OnRefresh = function()

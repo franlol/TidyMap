@@ -65,6 +65,20 @@ ns.translations.esES = {
     ["Addon menu"] = "Menú de addons",
     ["Day / night"] = "Día / noche",
 
+    ["Coordinates"] = "Coordenadas",
+
+    -- Texts
+    ["Texts"] = "Textos",
+    ["Font"] = "Fuente",
+    ["For every text of the map."] = "Para todos los textos del mapa.",
+    ["Outline"] = "Contorno",
+    ["Thin"] = "Fino",
+    ["Thick"] = "Grueso",
+    ["Ping"] = "Señal",
+    ["Who clicked the map, in their class color."] = "Quién ha hecho clic en el mapa, en su color de clase.",
+    ["Show who pings"] = "Mostrar quién hace la señal",
+    ["Bar behind the name"] = "Barra tras el nombre",
+
     -- Map
     ["Zoom"] = "Zoom",
     ["Zoom buttons on hover"] = "Botones de zoom al pasar",

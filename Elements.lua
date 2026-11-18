@@ -32,6 +32,8 @@ ns.ELEMENTS = {
         frame = function() return AddonCompartmentFrame end },
     { key = "daynight", name = "Day / night",
         frame = function() return MinimapCluster.DielFrame end },
+    { key = "coords", name = "Coordinates",
+        frame = function() return MinimapCluster.MinimapContainer.PlayerCoords end },
 }
 local BY_KEY = {}
 for _, e in ipairs(ns.ELEMENTS) do BY_KEY[e.key] = e end
