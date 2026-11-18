@@ -60,7 +60,7 @@ local function Save(f)
     if saved[f] then return end
     local points = {}
     for i = 1, f:GetNumPoints() do points[i] = { f:GetPoint(i) } end
-    saved[f] = { points = points, mouse = f:IsMouseEnabled() }
+    saved[f] = { points = points, mouse = f:IsMouseEnabled(), alpha = f:GetAlpha() }
 end
 
 local function Restore(f)
@@ -68,7 +68,7 @@ local function Restore(f)
     if not s then return end
     f:ClearAllPoints()
     for _, p in ipairs(s.points) do f:SetPoint(unpack(p)) end
-    f:SetAlpha(1)
+    f:SetAlpha(s.alpha or 1)
 end
 
 local function SetMouse(e, f, on)

@@ -15,6 +15,7 @@ local BLIZZARD_MASK = "ui-hud-minimap-frame-generic-mask"
 local BLIZZARD_HYBRID_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
 
 local border   -- Flaty shape border behind the minimap
+local compassAlpha = {}   -- Blizzard's own alpha of its frame art
 
 local function On()
     return ns.P and ns.P.enabled
@@ -44,9 +45,10 @@ local function ApplyMask()
     end
     -- Blizzard's round frame art (and the ring of the rotating mode): faded,
     -- so its own Show / Hide calls change nothing
-    local alpha = on and 0 or 1
-    MinimapCompassTexture:SetAlpha(alpha)
-    if MinimapCompassTextureUnderlay then MinimapCompassTextureUnderlay:SetAlpha(alpha) end
+    for _, t in ipairs({ MinimapCompassTexture, MinimapCompassTextureUnderlay }) do
+        compassAlpha[t] = compassAlpha[t] or t:GetAlpha()
+        t:SetAlpha(on and 0 or compassAlpha[t])
+    end
 end
 
 local function ClassColor()

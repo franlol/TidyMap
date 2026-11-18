@@ -13,19 +13,38 @@ local Flaty = LibStub("LibFlatyUI-1.0")
 
 local function On() return ns.P and ns.P.enabled end
 
--- text, its size setting, Blizzard's own font
+-- text, its size setting
 local TEXTS = {
-    { get = function() return MinimapZoneText end, size = "zone", blizzard = "GameFontHighlightSmall" },
-    { get = function() return TimeManagerClockTicker end, size = "clock", blizzard = "WhiteNormalNumberFont" },
+    { get = function() return MinimapZoneText end, size = "zone" },
+    { get = function() return TimeManagerClockTicker end, size = "clock" },
     { get = function()
         local pc = MinimapCluster.MinimapContainer.PlayerCoords
         return pc and pc.CoordText
-    end, size = "coords", blizzard = "GameFontHighlightSmall" },
+    end, size = "coords" },
 }
 
+-- Blizzard's own font of each text, kept before the first change and put
+-- back exactly when TidyMap is turned off
+local saved = {}
+local function Save(fs)
+    if saved[fs] then return end
+    local file, size, flags = fs:GetFont()
+    saved[fs] = { object = fs:GetFontObject(), file = file, size = size, flags = flags }
+end
+local function Restore(fs)
+    local s = saved[fs]
+    if not s then return end
+    if s.object then fs:SetFontObject(s.object) end
+    if s.file then fs:SetFont(s.file, s.size, s.flags or "") end
+end
+
+local barAlpha   -- Blizzard's own, kept before the first change
 local function ZoneBar(shown)
     local b = MinimapCluster.ZoneTextButton
-    if b and b.StateTexture then b.StateTexture:SetAlpha(shown and 1 or 0) end
+    local t = b and b.StateTexture
+    if not t then return end
+    barAlpha = barAlpha or t:GetAlpha()
+    t:SetAlpha(shown and barAlpha or 0)
 end
 
 local function Apply()
@@ -33,10 +52,11 @@ local function Apply()
     for _, x in ipairs(TEXTS) do
         local fs = x.get()
         if fs then
+            Save(fs)
             if On() then
                 Flaty.SetFontFile(fs, t.font, t[x.size], t.outline)
             else
-                fs:SetFontObject(x.blizzard)
+                Restore(fs)
             end
         end
     end

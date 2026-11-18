@@ -55,7 +55,9 @@ btn:SetScript("OnLeave", function()
 end)
 
 local function Apply()
-    btn:SetShown(not ns.db.icon.hide)
+    -- TidyMap off: the map is Blizzard's alone (the options still open
+    -- with /tidymap and from the addon menu)
+    btn:SetShown(ns.P.enabled and not ns.db.icon.hide)
     Place()
 end
 

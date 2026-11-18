@@ -27,12 +27,14 @@ end
 
 -- Blizzard's + and - buttons show while the mouse is over the map; off:
 -- faded and not clickable (the wheel still zooms)
+local saved = {}   -- [button] = Blizzard's own alpha and mouse
 local function ApplyButtons()
     local show = not ns.P.enabled or ns.P.zoom.buttons
     for _, b in ipairs({ Minimap.ZoomIn, Minimap.ZoomOut }) do
         if b then
-            b:SetAlpha(show and 1 or 0)
-            b:EnableMouse(show)
+            saved[b] = saved[b] or { alpha = b:GetAlpha(), mouse = b:IsMouseEnabled() }
+            b:SetAlpha(show and saved[b].alpha or 0)
+            b:EnableMouse(show and saved[b].mouse or false)
         end
     end
 end
