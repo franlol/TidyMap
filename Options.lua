@@ -287,6 +287,8 @@ local function Build()
     win:AddNav("profiles", L["Profiles"], BuildProfiles)
     UI.OnRefresh = function()
         win:SetSubtitle(L["Profile: %s"]:format(ns.profileName or ""))
+        local other = ns.ConflictingAddon()
+        win:SetStatus(other and ("|cffff7359" .. L["%s is also loaded: both change the minimap. Disable one of them and reload."]:format(other) .. "|r") or "")
     end
     -- while the window is open, the icons can be dragged on the map
     win:HookScript("OnShow", function() ns.SetEditing(true) end)

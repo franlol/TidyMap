@@ -205,8 +205,20 @@ ev:SetScript("OnEvent", function(self, event, name)
         SetProfile(ns.db.profileOf[ns.charKey] or DEFAULT)
         for _, m in ipairs(ns.modules) do m.start() end
         ns.ApplyAll()
+        local other = ns.ConflictingAddon()
+        if other then
+            print("|cfff5b852TidyMap|r: " .. L["%s is also loaded: both change the minimap. Disable one of them and reload."]:format(other))
+        end
     end
 end)
+
+-- Other minimap addons that restyle the same map
+local CONFLICTS = { "SexyMap", "BasicMinimap", "Mappy", "Chinchilla", "SimpleMinimap" }
+function ns.ConflictingAddon()
+    for _, name in ipairs(CONFLICTS) do
+        if C_AddOns.IsAddOnLoaded(name) then return name end
+    end
+end
 
 function ns.SetLanguagePref(lang)
     ns.db.language = lang

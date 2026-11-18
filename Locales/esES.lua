@@ -23,6 +23,8 @@ ns.translations.esES = {
     ["Map"] = "Mapa",
     ["Profiles"] = "Perfiles",
     ["Profile: %s"] = "Perfil: %s",
+    ["%s is also loaded: both change the minimap. Disable one of them and reload."] =
+        "%s también está cargado: los dos cambian el minimapa. Desactiva uno y recarga.",
 
     -- Look
     ["Style"] = "Estilo",
