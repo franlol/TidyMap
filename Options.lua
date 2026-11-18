@@ -5,8 +5,7 @@
 --   Icons    : Blizzard's icons around the map: clean mode, shown / on
 --              hover / hidden, place on the edge (also by dragging them
 --              on the map while this window is open)
---   Texts    : font and outline, sizes of zone, clock and coordinates,
---              who pinged the map
+--   Texts    : font and outline, sizes of zone, clock and coordinates
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
 -- Every change shows at once on the real minimap. Options that do not
@@ -200,11 +199,6 @@ local function BuildTexts(container)
         function(v) ns.P.texts.font = v ns.ApplyAll() end, { enableIf = On }))
     local g, s = Bind("texts", "outline")
     card:Add(UI.Segmented(card, L["Outline"], OUTLINES(), g, s, { enableIf = On }))
-
-    card = page:Add(1, UI.Card(page.content, L["Ping"], L["Who clicked the map, in their class color."]))
-    g, s = Bind("texts", "ping")
-    card:Add(UI.Check(card, L["Show who pings"], g, s, { enableIf = On }))
-    card:Add(SizeSlider(card, "pingSize", { sub = true, enableIf = Both(On, function() return ns.P.texts.ping end) }))
 
     card = page:Add(2, UI.Card(page.content, L["Zone"]))
     card:Add(SizeSlider(card, "zone"))

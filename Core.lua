@@ -44,7 +44,6 @@ ns.defaults = {
         outline = "",
         zone = 12, clock = 12, coords = 10,
         zoneBar = false,    -- Blizzard's bar behind the zone name
-        ping = true, pingSize = 12,
     },
 }
 

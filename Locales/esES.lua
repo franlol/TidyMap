@@ -74,9 +74,6 @@ ns.translations.esES = {
     ["Outline"] = "Contorno",
     ["Thin"] = "Fino",
     ["Thick"] = "Grueso",
-    ["Ping"] = "Señal",
-    ["Who clicked the map, in their class color."] = "Quién ha hecho clic en el mapa, en su color de clase.",
-    ["Show who pings"] = "Mostrar quién hace la señal",
     ["Bar behind the name"] = "Barra tras el nombre",
 
     -- Map
