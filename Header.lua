@@ -68,7 +68,8 @@ local function NewPiece(key)
     f.key = key
     f.edge = Layer(f, -8)
     f.plate = Layer(f, -7)
-    f.text = f:CreateFontString(nil, "OVERLAY")
+    -- a font from the start: text can arrive before the first apply
+    f.text = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     f.text:SetPoint("CENTER")
     f:Hide()
     return f
