@@ -184,8 +184,11 @@ local function Start()
     for _, name in ipairs({ "SetHeaderUnderneath", "SetEditModeScale", "UpdateMinimapConfig" }) do
         if MinimapCluster[name] then hooksecurefunc(MinimapCluster, name, Again) end
     end
-    if EventRegistry then
-        EventRegistry:RegisterCallback("EditMode.Exit", Again, ns)
+    -- after Edit Mode closes. A post-hook, not an EventRegistry callback: a
+    -- callback would run inside Blizzard's own exit and taint what follows
+    -- (protected actions then get blocked, blamed on TidyMap)
+    if EditModeManagerFrame and EditModeManagerFrame.ExitEditMode then
+        hooksecurefunc(EditModeManagerFrame, "ExitEditMode", Again)
     end
     local f = CreateFrame("Frame")
     f:RegisterEvent("ADDON_LOADED")
