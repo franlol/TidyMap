@@ -26,17 +26,14 @@ ns.translations.esES = {
 
     -- Look
     ["Style"] = "Estilo",
-    ["Sets shape, border and glow."] = "Cambia forma, borde y brillo.",
-    ["Sure?"] = "¿Seguro?",
+    ["Off: the minimap looks like Blizzard's."] = "Apagado: el minimapa se ve como el de Blizzard.",
+    ["Enabled"] = "Activado",
     ["Clean"] = "Limpio",
     ["Classic"] = "Clásico",
     ["Glow"] = "Brillo",
     ["Minimal"] = "Mínimo",
     ["Shape"] = "Forma",
-    ["Square"] = "Cuadrado",
-    ["Slightly rounded"] = "Algo redondeado",
-    ["Rounded square"] = "Cuadrado redondeado",
-    ["Round"] = "Redondo",
+    ["Corners"] = "Esquinas",
     ["Border"] = "Borde",
     ["Size"] = "Tamaño",
     ["Class color"] = "Color de clase",
@@ -44,8 +41,9 @@ ns.translations.esES = {
 
     -- Map
     ["Zoom"] = "Zoom",
-    ["The mouse wheel zooms the map."] = "La rueda del ratón acerca y aleja el mapa.",
-    ["Zoom out by itself"] = "Alejar solo",
+    ["After you zoom in with the mouse wheel, the map zooms back out by itself."] =
+        "Tras acercar el mapa con la rueda del ratón, vuelve a alejarse solo.",
+    ["Zoom back out"] = "Volver a alejar",
     ["After"] = "Tras",
     ["Minimap icon"] = "Icono en el minimapa",
     ["Language"] = "Idioma",

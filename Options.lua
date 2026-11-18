@@ -32,46 +32,48 @@ local function Apply() ns.ApplyAll() end
 -------------------------------------------------------------------------------
 -- Look
 -------------------------------------------------------------------------------
-local function ShapeTiles()
-    local out = {}
-    for _, o in ipairs(UI.ShapeList()) do
-        out[#out + 1] = { o[1], L[(o[2]:gsub("^Flaty: ", ""))], UI.GetShape(o[1]).mask }
-    end
-    return out
-end
+local function On() return ns.P.enabled end
+local function Both(a, b) return function() return a() and b() end end
+local function Pct(v) return ("%d%%"):format(v) end
 
 local function BuildLook(container)
     local page = UI.Page(container, 2)
 
-    -- styles replace shape, border and glow: they ask first
-    local card = page:Add(1, UI.Card(page.content, L["Style"], L["Sets shape, border and glow."]))
-    local list = {}
-    for _, s in ipairs(ns.STYLES) do
-        list[#list + 1] = { L[s.name], function() ns.ApplyStyle(s.key) UI.RefreshAll() end, confirm = L["Sure?"] }
-    end
-    card:Add(UI.Buttons(card, { list[1], list[2] }))
-    card:Add(UI.Buttons(card, { list[3], list[4] }))
-
-    card = page:Add(1, UI.Card(page.content, L["Shape"]))
-    card:Add(UI.Tiles(card, nil, ShapeTiles, function() return ns.P.shape end, function(v)
-        ns.P.shape = v
+    local card = page:Add(1, UI.Card(page.content, "TidyMap", L["Off: the minimap looks like Blizzard's."]))
+    card:Add(UI.Switch(card, L["Enabled"], function() return ns.P.enabled end, function(v)
+        ns.P.enabled = v
         ns.ApplyAll()
     end))
 
+    -- a style sets corners, border and glow at once
+    card = page:Add(1, UI.Card(page.content, L["Style"]))
+    local list = {}
+    for _, s in ipairs(ns.STYLES) do
+        list[#list + 1] = { L[s.name], function() ns.ApplyStyle(s.key) UI.RefreshAll() end }
+    end
+    card:Add(UI.Buttons(card, { list[1], list[2] }, { enableIf = On }))
+    card:Add(UI.Buttons(card, { list[3], list[4] }, { enableIf = On }))
+
+    card = page:Add(1, UI.Card(page.content, L["Shape"]))
+    card:Add(UI.Slider(card, L["Corners"], 0, 100, 1, function() return ns.P.corners end, function(v)
+        ns.P.corners = v
+        ns.ApplyAll()
+    end, { format = Pct, enableIf = On }))
+
     card = page:Add(2, UI.Card(page.content, L["Border"]))
-    local hasBorder = function() return ns.P.border.size > 0 end
+    local hasBorder = Both(On, function() return ns.P.border.size > 0 end)
     local g, s = Bind("border", "size")
-    card:Add(UI.Slider(card, L["Size"], 0, 8, 1, g, s, { format = UI.px }))
+    card:Add(UI.Slider(card, L["Size"], 0, 8, 1, g, s, { format = UI.px, enableIf = On }))
     g, s = Bind("border", "class")
     card:Add(UI.Check(card, L["Class color"], g, s, { enableIf = hasBorder }))
     card:Add(UI.Swatch(card, L["Color"], function() return ns.P.border.color end, Apply,
-        { alpha = true, enableIf = function() return hasBorder() and not ns.P.border.class end }))
+        { alpha = true, enableIf = Both(hasBorder, function() return not ns.P.border.class end) }))
 
     card = page:Add(2, UI.Card(page.content, L["Glow"]))
     g, s = Bind("glow", "on")
-    card:Add(UI.Switch(card, L["Glow"], g, s))
+    card:Add(UI.Switch(card, L["Glow"], g, s, { enableIf = On }))
     card:Add(UI.Swatch(card, L["Color"], function() return ns.P.glow.color end, Apply,
-        { alpha = true, enableIf = function() return ns.P.glow.on end }))
+        { alpha = true, enableIf = Both(On, function() return ns.P.glow.on end) }))
 
     page:Layout()
 end
@@ -96,12 +98,14 @@ end
 local function BuildMap(container)
     local page = UI.Page(container, 2)
 
-    local card = page:Add(1, UI.Card(page.content, L["Zoom"], L["The mouse wheel zooms the map."]))
+    local card = page:Add(1, UI.Card(page.content, L["Zoom"],
+        L["After you zoom in with the mouse wheel, the map zooms back out by itself."]))
     local g, s = Bind("zoom", "auto")
-    card:Add(UI.Check(card, L["Zoom out by itself"], g, s))
+    card:Add(UI.Check(card, L["Zoom back out"], g, s, { enableIf = On }))
     g, s = Bind("zoom", "delay")
     card:Add(UI.Slider(card, L["After"], 3, 60, 1, g, s, { sub = true,
-        format = function(v) return ("%d s"):format(v) end, enableIf = function() return ns.P.zoom.auto end }))
+        format = function(v) return ("%d s"):format(v) end,
+        enableIf = Both(On, function() return ns.P.zoom.auto end) }))
 
     card = page:Add(2, UI.Card(page.content, "TidyMap"))
     card:Add(UI.Check(card, L["Minimap icon"], function() return not ns.db.icon.hide end, function(v)

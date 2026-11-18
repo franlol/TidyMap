@@ -18,7 +18,7 @@ end
 local function OnZoom()
     Cancel()
     local z = ns.P.zoom
-    if not z.auto or Minimap:GetZoom() == 0 then return end
+    if not ns.P.enabled or not z.auto or Minimap:GetZoom() == 0 then return end
     timer = C_Timer.NewTimer(z.delay, function()
         timer = nil
         Minimap:SetZoom(0)

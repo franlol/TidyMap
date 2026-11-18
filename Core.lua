@@ -20,7 +20,8 @@ local function C(r, g, b, a) return { r = r, g = g, b = b, a = a or 1 } end
 ns.ACCENT = { 0.96, 0.72, 0.32 }
 
 ns.defaults = {
-    shape = "slightly",
+    enabled = true,     -- off: the minimap looks like Blizzard's
+    corners = 8,        -- 0 square ... 100 round (%)
     border = { size = 1, color = C(0, 0, 0, 1), class = false },
     glow = { on = false, color = C(0.96, 0.72, 0.32, 0.6) },
     zoom = { auto = true, delay = 10 },
@@ -30,19 +31,19 @@ local ACCOUNT = {
     icon = { hide = false, angle = 225 },
 }
 
--- Styles: one click sets the whole look (shape, border, glow)
+-- Styles: one click sets the whole look (corners, border, glow)
 ns.STYLES = {
     { key = "clean", name = "Clean", look = {
-        shape = "slightly", border = { size = 1, color = C(0, 0, 0, 1), class = false },
+        corners = 8, border = { size = 1, color = C(0, 0, 0, 1), class = false },
         glow = { on = false } } },
     { key = "classic", name = "Classic", look = {
-        shape = "round", border = { size = 2, color = C(0.78, 0.63, 0.32, 1), class = false },
+        corners = 100, border = { size = 2, color = C(0.78, 0.63, 0.32, 1), class = false },
         glow = { on = false } } },
     { key = "glow", name = "Glow", look = {
-        shape = "rounded", border = { size = 1, color = C(0.05, 0.05, 0.05, 1), class = false },
+        corners = 20, border = { size = 1, color = C(0.05, 0.05, 0.05, 1), class = false },
         glow = { on = true, color = C(0.96, 0.72, 0.32, 0.6) } } },
     { key = "minimal", name = "Minimal", look = {
-        shape = "square", border = { size = 0, color = C(0, 0, 0, 1), class = false },
+        corners = 0, border = { size = 0, color = C(0, 0, 0, 1), class = false },
         glow = { on = false } } },
 }
 
@@ -113,13 +114,27 @@ local function CharKey()
     return (name or "?") .. " - " .. (GetRealmName() or "?")
 end
 
+-- Older settings in the current form
+local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
+local function Migrate(p)
+    if type(p.shape) == "string" then
+        p.corners = p.corners or OLD_SHAPES[p.shape]
+        p.shape = nil
+    end
+end
+
+local function FillProfile(p)
+    Migrate(p)
+    Fill(p, ns.defaults)
+end
+
 local function SetProfile(name)
     local db = ns.db
     db.profiles[name] = db.profiles[name] or {}
     db.profileOf[ns.charKey] = name
     ns.profileName = name
     ns.P = db.profiles[name]
-    Fill(ns.P, ns.defaults)
+    FillProfile(ns.P)
 end
 
 function ns.UseProfile(name)
@@ -132,7 +147,7 @@ function ns.CopyProfile(from)
     if not src or from == ns.profileName then return end
     wipe(ns.P)
     for k, v in pairs(Copy(src)) do ns.P[k] = v end
-    Fill(ns.P, ns.defaults)
+    FillProfile(ns.P)
     ns.ApplyAll()
 end
 
