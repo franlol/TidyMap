@@ -223,13 +223,17 @@ local function PieceCard(page, col, key, title)
         card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
             { alpha = true, enableIf = shown }))
     end
+    if key == "coords" then
+        card:Add(UI.Segmented(card, L["Decimals"], { { 0, "0" }, { 1, "1" }, { 2, "2" } },
+            Get("decimals"), Set("decimals"), { enableIf = shown }))
+    end
 end
 
 local function BuildHeader(container)
     local page = UI.Page(container, 2)
 
     local card = page:Add(1, UI.Card(page.content, L["Header"],
-        L["TidyMap's own zone name and clock. Off: Blizzard's, on the Icons page."]))
+        L["TidyMap's own zone name, clock and coordinates. Off: Blizzard's, on the Icons page."]))
     card:Add(UI.Switch(card, L["TidyMap header"], function() return ns.P.header.on end, function(v)
         ns.P.header.on = v
         ns.ApplyAll()
@@ -237,6 +241,7 @@ local function BuildHeader(container)
 
     PieceCard(page, 1, "zone", L["Zone"])
     PieceCard(page, 2, "clock", L["Clock"])
+    PieceCard(page, 2, "coords", L["Coordinates"])
 
     page:Layout()
 end
@@ -273,9 +278,13 @@ local function BuildTexts(container)
     card:Add(SizeSlider(card, "clock"))
 
     card = page:Add(2, UI.Card(page.content, L["Coordinates"]))
-    card:Add(UI.Check(card, L["Show"], function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end,
-        function(v) C_CVar.SetCVar("minimapShowPlayerCoords", v and "1" or "0") end))
-    card:Add(SizeSlider(card, "coords", { enableIf = Both(On, function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end) }))
+    -- Blizzard's own coordinates (TidyMap's header has its own)
+    card:Add(UI.Check(card, L["Blizzard's coordinates"], function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end,
+        function(v) C_CVar.SetCVar("minimapShowPlayerCoords", v and "1" or "0") end,
+        { enableIf = function() return not ns.P.header.on end }))
+    card:Add(SizeSlider(card, "coords", { enableIf = Both(On, function()
+        return ns.P.header.on or C_CVar.GetCVarBool("minimapShowPlayerCoords")
+    end) }))
 
     page:Layout()
 end

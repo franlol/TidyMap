@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- TidyMap - The header: TidyMap's own zone name and clock
+-- TidyMap - The header: TidyMap's own zone name, clock and coordinates
 --
 -- Its own frames, so they can sit anywhere around the map without moving
 -- Blizzard's. Blizzard still does the work: the zone text and its PvP color
@@ -75,11 +75,12 @@ local function NewPiece(key)
     return f
 end
 
-local zone, clock = NewPiece("zone"), NewPiece("clock")
-local pieces = { zone, clock }
+local zone, clock, coords = NewPiece("zone"), NewPiece("clock"), NewPiece("coords")
+local pieces = { zone, clock, coords }   -- also the order they stack in
 
--- the zone: not clickable, so clicks reach the map (pings)
+-- zone and coordinates: not clickable, so clicks reach the map (pings)
 zone:EnableMouse(false)
+coords:EnableMouse(false)
 
 -- the clock: Blizzard's own click (its clock settings, or stop the alarm)
 -- and tooltip (local and realm time)
@@ -114,6 +115,24 @@ local function UpdateZoneText()
     end
 end
 
+-- Where the player is on the zone's map, with 0-2 decimals. Empty where the
+-- game does not tell (instances).
+local formats = {}
+local function UpdateCoordsText()
+    local c = Cfg(coords)
+    local d = c.decimals or 1
+    formats[d] = formats[d] or ("%%.%df, %%.%df"):format(d, d)
+    local text = ""
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local pos = mapID and C_Map.GetPlayerMapPosition(mapID, "player")
+    if pos then
+        local x, y = pos:GetXY()
+        if x and y and (x > 0 or y > 0) then text = formats[d]:format(x * 100, y * 100) end
+    end
+    coords.text:SetText(text)
+    coords.text:SetTextColor(c.color.r, c.color.g, c.color.b, c.color.a or 1)
+end
+
 local function UpdateClockText()
     if GameTime_GetTime then clock.text:SetText((GameTime_GetTime(true))) end
     local c = Cfg(clock).color
@@ -123,14 +142,16 @@ end
 -- Size to the text, background, and the alpha / mouse of its mode
 local function Paint(f)
     local t = ns.P.texts
-    Flaty.SetFontFile(f.text, t.font, f.key == "zone" and t.zone or t.clock, t.outline)
+    Flaty.SetFontFile(f.text, t.font, t[f.key], t.outline)
     local w = (f.text:GetStringWidth() or 0) + 2 * PAD_X
     local h = (f.text:GetStringHeight() or 10) + 2 * PAD_Y
     f:SetSize(w, h)
     local c = Cfg(f)
+    -- no text (coordinates in an instance): no background either
+    local kind = (f.text:GetText() or "") ~= "" and c.bg or "none"
     local bg = { c.bgColor.r, c.bgColor.g, c.bgColor.b, c.bgColor.a or 1 }
-    PaintLayer(f.plate, f, c.bg, w, h, bg)
-    PaintLayer(f.edge, f, c.bg, w + 2, h + 2, ns.BorderColor())
+    PaintLayer(f.plate, f, kind, w, h, bg)
+    PaintLayer(f.edge, f, kind, w + 2, h + 2, ns.BorderColor())
 
     local mode = Mode(f)
     if ns.IsEditing() then
@@ -174,14 +195,23 @@ local function Apply()
     end
     UpdateZoneText()
     UpdateClockText()
+    UpdateCoordsText()
     for _, f in ipairs(pieces) do
         f:Show()
         Paint(f)
     end
-    Place(zone)
-    local z, c = Cfg(zone), Cfg(clock)
-    local same = z.place == c.place and z.side == c.side and Mode(zone) ~= "hide"
-    Place(clock, same and zone or nil)
+    -- each piece stacks on the last shown one in the same place
+    for i, f in ipairs(pieces) do
+        local c, under = Cfg(f), nil
+        for j = i - 1, 1, -1 do
+            local o = Cfg(pieces[j])
+            if o.place == c.place and o.side == c.side and Mode(pieces[j]) ~= "hide" then
+                under = pieces[j]
+                break
+            end
+        end
+        Place(f, under)
+    end
 end
 ns.ApplyHeader = Apply
 
@@ -200,6 +230,14 @@ local function Start()
             local before = clock.text:GetText()
             UpdateClockText()
             if clock.text:GetText() ~= before then Paint(clock) end
+        end
+    end)
+    -- the coordinates, ten times a second while they can be seen
+    C_Timer.NewTicker(0.1, function()
+        if On() and coords:IsShown() and coords:GetAlpha() > 0 then
+            local before = coords.text:GetText()
+            UpdateCoordsText()
+            if coords.text:GetText() ~= before then Paint(coords) end
         end
     end)
 end

@@ -72,9 +72,9 @@ function ns.EffectiveMode(m)
     return m
 end
 
--- Blizzard's zone and clock give way to TidyMap's header while it is on
+-- Blizzard's zone, clock and coordinates give way to TidyMap's header
 function ns.InHeader(key)
-    return (key == "zone" or key == "clock") and ns.P.header.on
+    return (key == "zone" or key == "clock" or key == "coords") and ns.P.header.on
 end
 
 function ns.ElementMode(key)

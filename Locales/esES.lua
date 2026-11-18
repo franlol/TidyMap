@@ -43,8 +43,10 @@ ns.translations.esES = {
 
     -- Header
     ["Header"] = "Cabecera",
-    ["TidyMap's own zone name and clock. Off: Blizzard's, on the Icons page."] =
-        "Nombre de zona y reloj propios de TidyMap. Apagado: los de Blizzard, en la página Iconos.",
+    ["TidyMap's own zone name, clock and coordinates. Off: Blizzard's, on the Icons page."] =
+        "Nombre de zona, reloj y coordenadas propios de TidyMap. Apagado: los de Blizzard, en la página Iconos.",
+    ["Decimals"] = "Decimales",
+    ["Blizzard's coordinates"] = "Coordenadas de Blizzard",
     ["TidyMap header"] = "Cabecera de TidyMap",
     ["Place"] = "Lugar",
     ["Top"] = "Arriba",

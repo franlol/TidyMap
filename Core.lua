@@ -45,8 +45,8 @@ ns.defaults = {
         outline = "",
         zone = 12, clock = 12, coords = 10,
     },
-    -- TidyMap's header: its own zone name and clock (on: Blizzard's zone and
-    -- clock icons stay hidden). Each piece: shown / on hover / hidden, top or
+    -- TidyMap's header: its own zone name, clock and coordinates (on:
+    -- Blizzard's zone, clock and coordinates stay hidden). Each piece: shown / on hover / hidden, top or
     -- bottom, outside or inside the map, extra distance, background (none,
     -- flat, pill) and its color, text color (zone: Blizzard's PvP colors)
     header = {
@@ -55,6 +55,8 @@ ns.defaults = {
             bgColor = C(0.05, 0.05, 0.06, 0.9), pvp = true, color = C(1, 0.82, 0, 1) },
         clock = { mode = "show", place = "bottom", side = "outside", offset = 0, bg = "pill",
             bgColor = C(0.05, 0.05, 0.06, 0.9), color = C(1, 1, 1, 1) },
+        coords = { mode = "hover", place = "bottom", side = "inside", offset = 0, bg = "none",
+            bgColor = C(0.05, 0.05, 0.06, 0.9), color = C(1, 1, 1, 1), decimals = 1 },
     },
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true)
