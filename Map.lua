@@ -65,6 +65,15 @@ function ns.BorderColor()
     return b.class and ClassColor() or { b.color.r, b.color.g, b.color.b, b.color.a or 1 }
 end
 
+-- The border color of a flat plate (icon or header piece): none when its
+-- border is 0; the map's (none if the map has no border) or its own
+function ns.PlateEdgeColor(s)
+    if (s.edge or 0) <= 0 then return nil end
+    if s.mapColor then return ns.BorderColor() end
+    local c = s.edgeColor
+    return { c.r, c.g, c.b, c.a or 1 }
+end
+
 local function Apply()
     ApplyMask()
     if not On() then

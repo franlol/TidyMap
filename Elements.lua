@@ -152,25 +152,28 @@ local function PaintPlate(e, f, flat)
             p.bg:Hide() p.edge:Hide()
             return
         end
-        w, h, anchor = tw + 12, (text:GetStringHeight() or 10) + 6, text
+        w, h, anchor = tw + 8, (text:GetStringHeight() or 10) + 2, text
     else
         local box = fit or f
-        local fw, fh = box:GetSize()
-        w, h, anchor = fw + 4, fh + 4, box
+        w, h = box:GetSize()
+        anchor = box
     end
+    local s = ns.P.elements[e.key]
+    w, h = w + 2 * s.pad, h + 2 * s.pad
     local mask = Flaty.GetShape(Flaty.Rounded(ns.P.corners)).mask
+    local bg = s.bgColor
     p.bg:SetTexture(mask)
-    p.bg:SetVertexColor(0.05, 0.05, 0.06, 0.9)
+    p.bg:SetVertexColor(bg.r, bg.g, bg.b, bg.a or 1)
     p.bg:SetSize(w, h)
     p.bg:ClearAllPoints()
     p.bg:SetPoint("CENTER", anchor, "CENTER")
     p.bg:Show()
-    local c = ns.BorderColor()
+    local c = ns.PlateEdgeColor(s)
     p.edge:SetShown(c ~= nil)
     if c then
         p.edge:SetTexture(mask)
         p.edge:SetVertexColor(c[1], c[2], c[3], c[4])
-        p.edge:SetSize(w + 2, h + 2)
+        p.edge:SetSize(w + 2 * s.edge, h + 2 * s.edge)
         p.edge:ClearAllPoints()
         p.edge:SetPoint("CENTER", anchor, "CENTER")
     end

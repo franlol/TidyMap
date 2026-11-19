@@ -143,15 +143,15 @@ end
 local function Paint(f)
     local t = ns.P.texts
     Flaty.SetFontFile(f.text, t.font, t[f.key], t.outline)
-    local w = (f.text:GetStringWidth() or 0) + 2 * PAD_X
-    local h = (f.text:GetStringHeight() or 10) + 2 * PAD_Y
-    f:SetSize(w, h)
     local c = Cfg(f)
+    local w = (f.text:GetStringWidth() or 0) + 2 * (PAD_X + c.pad)
+    local h = (f.text:GetStringHeight() or 10) + 2 * (PAD_Y + c.pad)
+    f:SetSize(w, h)
     -- no text (coordinates in an instance): no background either
     local kind = (f.text:GetText() or "") ~= "" and c.bg or "none"
     local bg = { c.bgColor.r, c.bgColor.g, c.bgColor.b, c.bgColor.a or 1 }
     PaintLayer(f.plate, f, kind, w, h, bg)
-    PaintLayer(f.edge, f, kind, w + 2, h + 2, ns.BorderColor())
+    PaintLayer(f.edge, f, kind, w + 2 * c.edge, h + 2 * c.edge, ns.PlateEdgeColor(c))
 
     local mode = Mode(f)
     if ns.IsEditing() then

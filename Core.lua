@@ -19,6 +19,25 @@ if ns.version:find("^@") then ns.version = "dev" end
 local function C(r, g, b, a) return { r = r, g = g, b = b, a = a or 1 } end
 ns.ACCENT = { 0.96, 0.72, 0.32 }
 
+-- the plate behind an icon or a header piece (flat look): its padding, its
+-- border (0 = none; the map's border color or its own) and its color
+local function Plate(t)
+    t.pad = t.pad or 2
+    t.edge = t.edge or 1
+    t.mapColor = t.mapColor ~= false
+    t.edgeColor = t.edgeColor or C(0, 0, 0, 1)
+    t.bgColor = t.bgColor or C(0.05, 0.05, 0.06, 0.9)
+    return t
+end
+local function Icon(angle, dist)
+    return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100 })
+end
+local function Piece(t)
+    t.offset = t.offset or 0
+    t.pad = 0
+    return Plate(t)
+end
+
 ns.defaults = {
     enabled = true,     -- off: the minimap looks like Blizzard's
     corners = 8,        -- 0 square ... 100 round (%)
@@ -34,15 +53,17 @@ ns.defaults = {
     -- Blizzard's icons: shown / on hover / hidden, angle on the edge
     -- (0 right, 90 up), distance past the edge (px), look (Blizzard's art
     -- or flat) and size (% of Blizzard's)
+    -- The flat look of each icon: padding around it, border size, border
+    -- color (the map's, or its own) and background color.
     elements = {
-        zone = { mode = "show", angle = 90, dist = 12, look = "flat", size = 100 },
-        clock = { mode = "show", angle = 270, dist = 10, look = "flat", size = 100 },
-        calendar = { mode = "show", angle = 42, dist = 0, look = "flat", size = 100 },
-        tracking = { mode = "show", angle = 138, dist = 0, look = "flat", size = 100 },
-        mail = { mode = "show", angle = 162, dist = 0, look = "flat", size = 100 },
-        compartment = { mode = "show", angle = 20, dist = 0, look = "flat", size = 100 },
-        daynight = { mode = "show", angle = 64, dist = 0, look = "flat", size = 100 },
-        coords = { mode = "show", angle = 270, dist = -14, look = "flat", size = 100 },
+        zone = Icon(90, 12),
+        clock = Icon(270, 10),
+        calendar = Icon(42, 0),
+        tracking = Icon(138, 0),
+        mail = Icon(162, 0),
+        compartment = Icon(20, 0),
+        daynight = Icon(64, 0),
+        coords = Icon(270, -14),
     },
     -- the texts on and around the map: one font, a size each
     texts = {
@@ -56,12 +77,12 @@ ns.defaults = {
     -- flat, pill) and its color, text color (zone: Blizzard's PvP colors)
     header = {
         on = true,
-        zone = { mode = "show", place = "top", side = "outside", offset = 0, bg = "pill",
-            bgColor = C(0.05, 0.05, 0.06, 0.9), pvp = true, color = C(1, 0.82, 0, 1) },
-        clock = { mode = "show", place = "bottom", side = "outside", offset = 0, bg = "pill",
-            bgColor = C(0.05, 0.05, 0.06, 0.9), color = C(1, 1, 1, 1) },
-        coords = { mode = "hover", place = "bottom", side = "inside", offset = 0, bg = "none",
-            bgColor = C(0.05, 0.05, 0.06, 0.9), color = C(1, 1, 1, 1), decimals = 1 },
+        zone = Piece({ mode = "show", place = "top", side = "outside", bg = "pill",
+            pvp = true, color = C(1, 0.82, 0, 1) }),
+        clock = Piece({ mode = "show", place = "bottom", side = "outside", bg = "pill",
+            color = C(1, 1, 1, 1) }),
+        coords = Piece({ mode = "hover", place = "bottom", side = "inside", bg = "none",
+            color = C(1, 1, 1, 1), decimals = 1 }),
     },
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true)
@@ -94,6 +115,7 @@ local function Copy(t)
     for k, v in pairs(t) do c[k] = Copy(v) end
     return c
 end
+ns.Copy = Copy
 
 -- Missing keys of t from def (the rest is kept)
 local function Fill(t, def)

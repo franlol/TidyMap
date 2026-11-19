@@ -102,6 +102,21 @@ local MODE_TAG = {
 }
 
 local function Sel() return ns.P.elements[ns.selected] end
+
+-- The plate of the flat look (icons and header pieces alike): padding,
+-- border size, border color (the map's or its own) and background color
+local function PlateRows(card, cfg, enableIf)
+    local function Get(k) return function() return cfg()[k] end end
+    local function Set(k) return function(v) cfg()[k] = v ns.ApplyAll() end end
+    card:Add(UI.Slider(card, L["Padding"], 0, 10, 1, Get("pad"), Set("pad"), { format = UI.px, enableIf = enableIf }))
+    card:Add(UI.Slider(card, L["Border"], 0, 4, 1, Get("edge"), Set("edge"), { format = UI.px, enableIf = enableIf }))
+    local hasEdge = Both(enableIf, function() return cfg().edge > 0 end)
+    card:Add(UI.Check(card, L["Map's border color"], Get("mapColor"), Set("mapColor"), { sub = true, enableIf = hasEdge }))
+    card:Add(UI.Swatch(card, L["Border color"], function() return cfg().edgeColor end, Apply,
+        { alpha = true, sub = true, enableIf = Both(hasEdge, function() return not cfg().mapColor end) }))
+    card:Add(UI.Swatch(card, L["Background color"], function() return cfg().bgColor end, Apply,
+        { alpha = true, enableIf = enableIf }))
+end
 local function ElementName(key)
     for _, e in ipairs(ns.ELEMENTS) do
         if e.key == key then return L[e.name] end
@@ -160,10 +175,16 @@ local function BuildIcons(container)
         Sel().dist = v
         ApplySel()
     end, { format = UI.px, enableIf = placed }))
+    card:Add(UI.Heading(card, L["Flat look"]))
+    PlateRows(card, Sel, Both(placed, function() return Sel().look == "flat" end))
     card:Add(UI.Buttons(card, {
         { L["Reset this icon"], function()
             local d = ns.defaults.elements[ns.selected]
-            Sel().angle, Sel().dist, Sel().look, Sel().size = d.angle, d.dist, d.look, d.size
+            for _, k in ipairs({ "angle", "dist", "look", "size", "pad", "edge", "mapColor" }) do Sel()[k] = d[k] end
+            for _, k in ipairs({ "edgeColor", "bgColor" }) do
+                local c = d[k]
+                Sel()[k] = { r = c.r, g = c.g, b = c.b, a = c.a }
+            end
             ApplySel()
             UI.RefreshAll()
         end },
@@ -173,8 +194,7 @@ local function BuildIcons(container)
     card:Add(UI.Buttons(card, {
         { L["Reset all icons"], function()
             for key, d in pairs(ns.defaults.elements) do
-                local t = ns.P.elements[key]
-                t.mode, t.angle, t.dist, t.look, t.size = d.mode, d.angle, d.dist, d.look, d.size
+                ns.P.elements[key] = ns.Copy(d)
             end
             ns.ApplyAll()
             UI.RefreshAll()
@@ -213,8 +233,7 @@ local function PieceCard(page, col, key, title)
         { format = UI.px, enableIf = shown }))
     card:Add(UI.Segmented(card, L["Background"], { { "none", L["None"] }, { "flat", L["Flat"] }, { "pill", L["Pill"] } },
         Get("bg"), Set("bg"), { enableIf = shown }))
-    card:Add(UI.Swatch(card, L["Background color"], function() return C().bgColor end, Apply,
-        { alpha = true, sub = true, enableIf = Both(shown, function() return C().bg ~= "none" end) }))
+    PlateRows(card, C, Both(shown, function() return C().bg ~= "none" end))
     if key == "zone" then
         card:Add(UI.Check(card, L["PvP colors"], Get("pvp"), Set("pvp"), { enableIf = shown }))
         card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
