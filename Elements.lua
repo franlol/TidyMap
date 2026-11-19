@@ -39,9 +39,12 @@ ns.ELEMENTS = {
         frame = function() return MinimapCluster.Tracking end,
         buttons = function(f) return { f.Button } end,
         decor = function(f) return { f.Background } end },
+    -- the holder always exists; the envelope only shows with mail, so the
+    -- flat plate goes on the envelope (and hides with it)
     { key = "mail", name = "Mail",
         frame = function() return MinimapCluster.IndicatorFrame end,
-        buttons = function(f) return { f.MailFrame } end },
+        buttons = function(f) return { f.MailFrame } end,
+        plateOn = function(f) return f.MailFrame end },
     { key = "compartment", name = "Addon menu",
         frame = function() return AddonCompartmentFrame end },
     { key = "daynight", name = "Day / night",
