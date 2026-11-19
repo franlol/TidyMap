@@ -79,9 +79,10 @@ function ns.OnElementPlaced(key, f)
     o:Show()
 end
 
--- Lock icons off: the outlines stay (window open or not) until locked again
+-- Unlocked: the outlines stay (window open or not) until locked again or the
+-- next login (unlocked is never saved)
 local function ApplyLock()
-    ns.SetEditing(ns.P.enabled and not ns.P.locked)
+    ns.SetEditing(ns.P.enabled and ns.unlocked)
 end
 ns.Module(function() end, ApplyLock)
 

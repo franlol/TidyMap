@@ -201,8 +201,8 @@ local function BuildIcons(container)
 
     card = right:Add(1, UI.Card(right.content, L["All icons"]))
     -- Blizzard's icons and other addons' buttons alike
-    card:Add(UI.Check(card, L["Lock icons"], function() return ns.P.locked end, function(v)
-        ns.P.locked = v
+    card:Add(UI.Check(card, L["Lock icons"], function() return not ns.unlocked end, function(v)
+        ns.unlocked = not v
         ns.ApplyAll()
     end, { enableIf = On, tip = L["Unlocked: drag any icon along the edge of the map, other addons' buttons too. Their clicks wait until locked again."] }))
     card:Add(UI.Buttons(card, {
@@ -468,10 +468,10 @@ local function Build()
     -- them along the edge or click them; off again when the window closes
     -- the same as Icons > Lock icons, at hand on every page
     win:AddHeaderButton(L["Unlock icons"], function()
-        ns.P.locked = not ns.P.locked
+        ns.unlocked = not ns.unlocked
         ns.ApplyAll()
         UI.RefreshAll()
-    end, function() return not ns.P.locked end, L["Drag them along the edge of the map, or click one for its settings."])
+    end, function() return ns.unlocked end, L["Drag them along the edge of the map, or click one for its settings."])
     win:Select("look")
 end
 

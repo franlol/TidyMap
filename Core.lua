@@ -52,7 +52,6 @@ ns.defaults = {
     -- after a zoom in: "out" (back out after delay s), "remember" or "blizzard"
     zoom = { mode = "out", delay = 10, buttons = true },
     clean = false,      -- every shown icon only on hover
-    locked = true,      -- icons (Blizzard's and other addons') can't be dragged
     -- the whole minimap by situation: always, only out of combat or only in
     -- combat; its opacity when shown and when faded, fade time, and whether
     -- the mouse over it brings it back
@@ -84,6 +83,10 @@ ns.defaults = {
     -- moved into the addon menu ([name] = true)
     buttons = { flat = true, menu = {} },
 }
+
+-- Icons unlocked (dragged on the map): for this session only, every login
+-- starts locked
+ns.unlocked = false
 
 local ACCOUNT = {
     icon = { hide = false, angle = 225 },
@@ -176,6 +179,8 @@ end
 -- Older settings in the current form
 local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
 local function Migrate(p)
+    -- the lock is not saved any more (every login starts locked)
+    p.locked = nil
     -- one font / outline and a size per text became a full style per text
     -- (the text colors moved here from the header pieces)
     local t = p.texts

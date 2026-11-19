@@ -65,7 +65,7 @@ local function ApplyButton(dbi, name)
     -- addon), and unlocks only the ones it locked
     if dbi.Lock then
         local mine = Locked()
-        if on and ns.P.locked then
+        if on and not ns.unlocked then
             if not mine[name] and not (b.db and b.db.lock) then
                 dbi:Lock(name)
                 mine[name] = true
