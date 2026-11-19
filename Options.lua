@@ -20,6 +20,7 @@ local _, ns = ...
 local L = ns.L
 
 local UI = LibStub("LibFlatyUI-1.0"):New({ accent = ns.ACCENT })
+ns.UI = UI   -- (Position.lua: the arrows around the map's box)
 UI.OnChange = function() UI.RefreshAll() end
 local STRINGS = { confirm = "Click again to confirm", search = "Search...", accept = "Accept",
     cancel = "Cancel", reset = "Reset", none = "None" }

@@ -85,7 +85,7 @@ ns.translations.esES = {
         "Arrastra el mapa a cualquier parte de la pantalla. La rueda del ratón sobre él cambia su tamaño.",
     ["Minimap"] = "Minimapa",
     ["Drag to move · Wheel to resize · Click for its settings"] = "Arrastra para mover · Rueda para cambiar el tamaño · Clic para sus opciones",
-    ["Shift: no snapping"] = "Mayús: sin ajuste",
+    ["Shift: no snapping · Arrows: 1 px (Shift 10)"] = "Mayús: sin ajuste · Flechas: 1 px (Mayús 10)",
     ["Place"] = "Lugar",
     ["Reset position"] = "Restablecer posición",
     ["Back where Edit Mode had it, at its size."] = "Vuelve a donde lo tenía el Modo edición, con su tamaño.",

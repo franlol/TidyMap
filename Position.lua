@@ -10,7 +10,7 @@
 --
 -- "Move map" (header): a box over the map, like Sigil's frames. Drag it
 -- (snaps to the grid and the screen center; Shift moves freely), wheel to
--- resize, click for the Map page.
+-- resize, click for the Map page; arrows around it nudge 1 px (Shift 10).
 -------------------------------------------------------------------------------
 
 local _, ns = ...
@@ -181,7 +181,7 @@ local function Tip(m)
     GameTooltip:SetOwner(m, "ANCHOR_TOP")
     GameTooltip:SetText(L["Minimap"], 1, 1, 1)
     GameTooltip:AddLine(L["Drag to move · Wheel to resize · Click for its settings"], 0.7, 0.7, 0.7)
-    GameTooltip:AddLine(L["Shift: no snapping"], 0.7, 0.7, 0.7)
+    GameTooltip:AddLine(L["Shift: no snapping · Arrows: 1 px (Shift 10)"], 0.7, 0.7, 0.7)
     GameTooltip:Show()
 end
 
@@ -236,6 +236,26 @@ local function BuildMover()
         -- Blizzard's icons re-place on the map's new spot
         ns.ApplyAll()
     end)
+
+    -- arrows outside each side: 1 px a click, 10 with Shift
+    local ARROWS = {
+        { "up", "BOTTOM", "TOP", 0, 4, 0, 1 },
+        { "down", "TOP", "BOTTOM", 0, -4, 0, -1 },
+        { "left", "RIGHT", "LEFT", -4, 0, -1, 0 },
+        { "right", "LEFT", "RIGHT", 4, 0, 1, 0 },
+    }
+    for _, a in ipairs(ARROWS) do
+        local b = ns.UI.IconButton(m, a[1], 16, function()
+            local n = IsShiftKeyDown() and 10 or 1
+            local p = ns.P.position
+            local w, h = MapSize()
+            p.x = Clamp(p.x + a[6] * n, w / 2, UIParent:GetWidth() / 2)
+            p.y = Clamp(p.y + a[7] * n, h / 2, UIParent:GetHeight() / 2)
+            Place()
+            ns.ApplyAll()
+        end)
+        b:SetPoint(a[2], m, a[3], a[4], a[5])
+    end
     return m
 end
 
