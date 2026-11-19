@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- TidyMap - The minimap's look: corners, border and glow
 --
--- Position and size stay with Edit Mode. TidyMap only cuts the map to a
+-- Position and size: Position.lua. TidyMap cuts the map to a
 -- rounded square (the game's own mask), hides Blizzard's round frame art and
 -- draws a flat border and glow behind it (LibFlatyUI shapes). Turned off,
 -- the map gets Blizzard's own mask and frame back.

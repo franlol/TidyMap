@@ -19,6 +19,7 @@ Locales\Locale.lua
 Locales\esES.lua
 Core.lua
 Map.lua
+Position.lua
 Elements.lua
 Icon.lua
 Buttons.lua

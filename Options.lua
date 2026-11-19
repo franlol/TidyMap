@@ -9,9 +9,9 @@
 --   Addons   : other addons' minimap buttons: flat look, into the addon menu
 --   Visibility: Clean mode, each part shown / on hover / hidden, the whole
 --              map by situation
---   Map      : zoom, the minimap icon, language
+--   Map      : place and size, zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
--- "Unlock icons" (header): drag icons on the map.
+-- "Unlock icons" (header): drag icons on the map. "Move map": drag the map.
 -- Every change shows at once on the real minimap. Options that do not
 -- apply are greyed out, never hidden.
 -------------------------------------------------------------------------------
@@ -390,7 +390,22 @@ end
 local function BuildMap(container)
     local page = UI.Page(container, 2)
 
-    local card = page:Add(1, UI.Card(page.content, L["Zoom"], L["The mouse wheel zooms the map."]))
+    local card = page:Add(1, UI.Card(page.content, L["Place"]))
+    card:Add(UI.Slider(card, L["Size"], 50, 200, 5, function()
+        return ns.P.position and ns.P.position.size or 100
+    end, function(v)
+        if not ns.P.position then return end
+        ns.P.position.size = v
+        ns.ApplyAll()
+    end, { format = Pct, enableIf = On }))
+    card:Add(UI.Buttons(card, {
+        { L["Reset position"], function()
+            ns.ResetMapPosition()
+            UI.RefreshAll()
+        end, "danger", L["Back where Edit Mode had it, at its size."], confirm = true },
+    }, { enableIf = On }))
+
+    card = page:Add(1, UI.Card(page.content, L["Zoom"], L["The mouse wheel zooms the map."]))
     local g, s = Bind("zoom", "mode")
     card:Add(UI.Segmented(card, L["After zooming in"], {
         { "out", L["Zoom back out"] }, { "remember", L["Remember"] }, { "blizzard", L["Leave it"] },
@@ -568,18 +583,12 @@ local function Build()
         ns.ApplyAll()
         UI.RefreshAll()
     end, function() return ns.unlocked end, L["Drag any icon on the map, or click one for its settings."])
-    -- "Move map": the map's place belongs to Blizzard's Edit Mode (saved in
-    -- its layout), so this opens it as Blizzard's own buttons do (raid
-    -- frames, damage meter). Not in combat; the window closes to free the map.
+    -- "Move map": a box over the map to drag it (Position.lua); until
+    -- pressed again or the next login
     win:AddHeaderButton(L["Move map"], function()
-        if InCombatLockdown() then
-            UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1, 0.1, 0.1)
-            return
-        end
-        if not (EditModeManagerFrame and EditModeManagerFrame:CanEnterEditMode()) then return end
-        win:Hide()
-        ShowUIPanel(EditModeManagerFrame)
-    end, nil, L["Opens Edit Mode: drag the minimap there."])
+        ns.SetMovingMap(not ns.movingMap)
+        UI.RefreshAll()
+    end, function() return ns.movingMap end, L["Drag the map anywhere on the screen. The mouse wheel over it changes its size."])
     win:Select("look")
 end
 
@@ -590,6 +599,18 @@ function ns.ToggleOptions()
         return
     end
     win:Toggle()
+end
+
+-- A page of the window (the map's box clicked: Map)
+function ns.SelectPage(key)
+    if not win then Build() end
+    if not win:IsShown() then win:Show() end
+    win:Select(key)
+    UI.RefreshAll()
+end
+
+function ns.RefreshOptions()
+    if win and win:IsShown() then UI.RefreshAll() end
 end
 
 -- An icon clicked or dragged on the map: its settings
