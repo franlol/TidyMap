@@ -1,18 +1,14 @@
 -------------------------------------------------------------------------------
 -- TidyMap - Editing on the map itself, while the icons are unlocked
--- Every piece of the map gets an outline:
---   · icons: drag along the edge of the shape, click for their settings
---   · header (zone, clock, coordinates): drag to the top or bottom, inside or
---     outside the map, click for the Header page
---   · other addons' buttons (LibDBIcon): outline only, it lets the mouse
---     through; LibDBIcon's own drag moves them (unlocked by Buttons.lua)
--- The map itself keeps its clicks (pings).
+-- Every Blizzard icon gets an outline: drag it along the edge of the shape,
+-- or click it to open its settings. The map itself keeps its clicks (pings).
+-- Other addons' buttons move with LibDBIcon's own drag (Buttons.lua).
 -------------------------------------------------------------------------------
 
 local _, ns = ...
 local L = ns.L
 
-local icons, pieces, addons = {}, {}, {}   -- the outlines, per key / name
+local overlays = {}
 local editing = false
 local atan2 = math.atan2 or atan2
 
@@ -22,85 +18,59 @@ local function Paint(o, hot)
     o:SetBackdropBorderColor(A[1], A[2], A[3], 1)
 end
 
-local function NewOutline(mouse)
+-- Angle of the cursor around the map's center, 0-359
+local function CursorAngle()
+    local mx, my = Minimap:GetCenter()
+    local scale = Minimap:GetEffectiveScale()
+    local cx, cy = GetCursorPosition()
+    return math.floor(math.deg(atan2(cy / scale - my, cx / scale - mx)) + 0.5) % 360
+end
+
+local function Overlay(key)
+    if overlays[key] then return overlays[key] end
     local o = CreateFrame("Button", nil, UIParent, "BackdropTemplate")
     o:SetFrameStrata("HIGH")
     o:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
     Paint(o, false)
-    o:EnableMouse(mouse)
-    o:Hide()
-    return o
-end
-
--- Name and hint on mouse over (icons and header pieces)
-local function Hover(o, name, hint)
+    o:RegisterForClicks("LeftButtonUp")
+    o:RegisterForDrag("LeftButton")
     o:SetScript("OnEnter", function(self)
         Paint(self, true)
+        local e
+        for _, x in ipairs(ns.ELEMENTS) do if x.key == key then e = x end end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:SetText(name, 1, 1, 1)
-        GameTooltip:AddLine(hint, 0.7, 0.7, 0.7)
+        GameTooltip:SetText(L[e.name], 1, 1, 1)
+        GameTooltip:AddLine(L["Drag along the edge · Click for its settings"], 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     o:SetScript("OnLeave", function(self)
         Paint(self, false)
         GameTooltip:Hide()
     end)
-end
-
--- Draggable outline: move(self) runs every frame while it is dragged
-local function Draggable(o, move, done)
-    o:RegisterForClicks("LeftButtonUp")
-    o:RegisterForDrag("LeftButton")
     o:SetScript("OnDragStart", function(self)
         GameTooltip:Hide()
-        self:SetScript("OnUpdate", move)
+        self:SetScript("OnUpdate", function()
+            ns.P.elements[key].angle = CursorAngle()
+            ns.ApplyElement(key)
+        end)
     end)
     o:SetScript("OnDragStop", function(self)
         self:SetScript("OnUpdate", nil)
-        done()
+        ns.SelectElement(key)
     end)
-    o:SetScript("OnClick", done)
-end
-
--- The cursor around the map's center: angle (0-359) and height
-local function Cursor()
-    local mx, my = Minimap:GetCenter()
-    local scale = Minimap:GetEffectiveScale()
-    local cx, cy = GetCursorPosition()
-    local dx, dy = cx / scale - mx, cy / scale - my
-    return math.floor(math.deg(atan2(dy, dx)) + 0.5) % 360, dy
-end
-
-local function ElementName(key)
-    for _, e in ipairs(ns.ELEMENTS) do
-        if e.key == key then return L[e.name] end
-    end
-    return key
-end
-
--------------------------------------------------------------------------------
--- Icons
--------------------------------------------------------------------------------
-local function IconOutline(key)
-    if icons[key] then return icons[key] end
-    local o = NewOutline(true)
-    Hover(o, ElementName(key), L["Drag along the edge · Click for its settings"])
-    Draggable(o, function()
-        ns.P.elements[key].angle = (Cursor())
-        ns.ApplyElement(key)
-    end, function() ns.SelectElement(key) end)
-    icons[key] = o
+    o:SetScript("OnClick", function() ns.SelectElement(key) end)
+    overlays[key] = o
     return o
 end
 
 -- Elements.lua calls this after placing an icon
 function ns.OnElementPlaced(key, f)
-    local o = icons[key]
-    if not editing or not ns.P.enabled or ns.InHeader(key) then
+    local o = overlays[key]
+    if not editing or not ns.P.enabled then
         if o then o:Hide() end
         return
     end
-    o = IconOutline(key)
+    o = Overlay(key)
     -- the icon's size on screen, at least 16 px
     local k = f:GetEffectiveScale() / UIParent:GetEffectiveScale()
     o:SetSize(math.max(16, f:GetWidth() * k), math.max(16, f:GetHeight() * k))
@@ -109,80 +79,16 @@ function ns.OnElementPlaced(key, f)
     o:Show()
 end
 
--------------------------------------------------------------------------------
--- Header pieces: above or below the map, outside or inside its edge
--------------------------------------------------------------------------------
-local function PieceOutline(key, f)
-    if pieces[key] then return pieces[key] end
-    local o = NewOutline(true)
-    Hover(o, ElementName(key), L["Drag above or below the map, inside or outside · Click for the header settings"])
-    Draggable(o, function()
-        local _, dy = Cursor()
-        local c = ns.P.header[key]
-        local place = dy >= 0 and "top" or "bottom"
-        local side = math.abs(dy) > Minimap:GetHeight() / 2 and "outside" or "inside"
-        if c.place ~= place or c.side ~= side then
-            c.place, c.side = place, side
-            ns.ApplyHeader()
-        end
-    end, function() ns.OpenPage("header") end)
-    -- the piece's own size, wherever it goes
-    o:SetPoint("TOPLEFT", f, "TOPLEFT")
-    o:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT")
-    pieces[key] = o
-    return o
-end
-
-local function ApplyPieces()
-    for key, f in pairs(ns.HeaderPieces()) do
-        if editing and ns.P.enabled and f:IsShown() then
-            PieceOutline(key, f):Show()
-        elseif pieces[key] then
-            pieces[key]:Hide()
-        end
-    end
-end
-
--------------------------------------------------------------------------------
--- Other addons' buttons: the button LibDBIcon gives (GetMinimapButton), only
--- outlined; the outline follows it and lets the mouse through
--------------------------------------------------------------------------------
-local function ApplyAddons()
-    for _, o in pairs(addons) do o:Hide() end
-    local dbi = LibStub("LibDBIcon-1.0", true)
-    if not editing or not ns.P.enabled or not dbi then return end
-    for _, name in ipairs(dbi:GetButtonList()) do
-        local b = dbi:GetMinimapButton(name)
-        if b and b:IsShown() then
-            local o = addons[name]
-            if not o then
-                o = NewOutline(false)
-                o:SetPoint("TOPLEFT", b, "TOPLEFT")
-                o:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT")
-                addons[name] = o
-            end
-            o:Show()
-        end
-    end
-end
-
--------------------------------------------------------------------------------
 -- Lock icons off: the outlines stay (window open or not) until locked again
--------------------------------------------------------------------------------
-function ns.SetEditing(on)
-    editing = on and true or false
-    if not editing then
-        for _, o in pairs(icons) do o:Hide() end
-    end
-    ns.SetElementsEditing(editing)
-    ApplyPieces()
-    ApplyAddons()
-end
-
--- Buttons.lua: an addon's button created after the unlock
-ns.RefreshAddonOutlines = ApplyAddons
-
 local function ApplyLock()
     ns.SetEditing(ns.P.enabled and not ns.P.locked)
 end
 ns.Module(function() end, ApplyLock)
+
+function ns.SetEditing(on)
+    editing = on and true or false
+    if not editing then
+        for _, o in pairs(overlays) do o:Hide() end
+    end
+    ns.SetElementsEditing(editing)
+end

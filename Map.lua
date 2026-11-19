@@ -71,7 +71,7 @@ function ns.PlateCorners(s)
     return s.corners or 0
 end
 
--- The border color of a flat plate (icon or header piece): none when its
+-- The border color of a flat plate (an icon's): none when its
 -- border is 0; the map's (none if the map has no border) or its own
 function ns.PlateEdgeColor(s)
     if (s.edge or 0) <= 0 then return nil end

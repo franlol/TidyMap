@@ -2,11 +2,9 @@
 -- TidyMap - Options window (LibFlatyUI-1.0)
 --
 --   Look     : on / off, styles (one click), corners, border, glow
---   Header   : TidyMap's own zone name and clock: shown / on hover /
---              hidden, place, background, colors
---   Icons    : Blizzard's icons around the map: clean mode, shown / on
---              hover / hidden, place on the edge (also by dragging them
---              on the map while this window is open)
+--   Icons    : Blizzard's icons around the map (zone, clock and
+--              coordinates too): clean mode, shown / on hover / hidden,
+--              place on the edge (also by dragging them on the map)
 --   Texts    : each text's font, size, outline, shadow and color
 --   Addons   : other addons' minimap buttons: flat look, into the addon menu
 --   Map      : zoom, the minimap icon, language
@@ -104,18 +102,16 @@ local MODE_TAG = {
 
 local function Sel() return ns.P.elements[ns.selected] end
 
--- The plate of the flat look (icons and header pieces alike): padding
--- (negative: inside the picture's empty margins), corners (the map's or its
--- own), border size, border color (the map's or its own), background color.
--- cornersIf: corners apply (a pill has round ends of its own)
-local function PlateRows(card, cfg, enableIf, cornersIf)
+-- The plate of the flat look: padding (negative: inside the picture's empty
+-- margins), corners (the map's or its own), border size, border color (the
+-- map's or its own), background color
+local function PlateRows(card, cfg, enableIf)
     local function Get(k) return function() return cfg()[k] end end
     local function Set(k) return function(v) cfg()[k] = v ns.ApplyAll() end end
     card:Add(UI.Slider(card, L["Padding"], -10, 10, 1, Get("pad"), Set("pad"), { format = UI.px, enableIf = enableIf }))
-    local shaped = cornersIf and Both(enableIf, cornersIf) or enableIf
-    card:Add(UI.Check(card, L["Map's corners"], Get("mapCorners"), Set("mapCorners"), { enableIf = shaped }))
+    card:Add(UI.Check(card, L["Map's corners"], Get("mapCorners"), Set("mapCorners"), { enableIf = enableIf }))
     card:Add(UI.Slider(card, L["Corners"], 0, 100, 1, Get("corners"), Set("corners"),
-        { sub = true, format = Pct, enableIf = Both(shaped, function() return not cfg().mapCorners end) }))
+        { sub = true, format = Pct, enableIf = Both(enableIf, function() return not cfg().mapCorners end) }))
     card:Add(UI.Slider(card, L["Border"], 0, 4, 1, Get("edge"), Set("edge"), { format = UI.px, enableIf = enableIf }))
     local hasEdge = Both(enableIf, function() return cfg().edge > 0 end)
     card:Add(UI.Check(card, L["Map's border color"], Get("mapColor"), Set("mapColor"), { sub = true, enableIf = hasEdge }))
@@ -144,23 +140,31 @@ local function BuildIcons(container)
 
     card = left:Add(1, UI.Card(left.content, L["Icons"]))
     card:Add(UI.List(card, {
-        items = ns.IconList,
+        items = function() return ns.ELEMENTS end,
         label = function(e) return L[e.name] end,
         tag = function(e) return MODE_TAG[ns.ElementMode(e.key)]() end,
         selected = function(e) return e.key == ns.selected end,
         onSelect = function(_, e) ns.selected = e.key UI.RefreshAll() end,
-        rows = #ns.IconList(),
+        rows = #ns.ELEMENTS,
         enableIf = On,
     }))
 
     card = right:Add(1, UI.Card(right.content, ElementName(ns.selected)))
     local title = card
     local free = On
-    card:Add(UI.Segmented(card, L["Show"], MODES(), function() return Sel().mode end, function(v)
+    -- the coordinates: shown or not is the game's own option
+    card:Add(UI.Segmented(card, L["Show"], MODES(), function() return ns.ElementMode(ns.selected) == "hide" and "hide" or Sel().mode end, function(v)
+        if ns.selected == "coords" then
+            C_CVar.SetCVar("minimapShowPlayerCoords", v == "hide" and "0" or "1")
+        end
         Sel().mode = v
         ApplySel()
     end, { enableIf = free }))
-    local placed = Both(free, function() return Sel().mode ~= "hide" end)
+    local placed = Both(free, function() return ns.ElementMode(ns.selected) ~= "hide" end)
+    card:Add(UI.Segmented(card, L["Decimals"], { { "0", "0" }, { "1", "1" } },
+        function() return C_CVar.GetCVarBool("coordsByTenths") and "1" or "0" end,
+        function(v) C_CVar.SetCVar("coordsByTenths", v) end,
+        { enableIf = Both(placed, function() return ns.selected == "coords" end) }))
     card:Add(UI.Segmented(card, L["Look"], { { "flat", L["Flat"] }, { "blizzard", "Blizzard" } },
         function() return Sel().look end, function(v)
             Sel().look = v
@@ -223,47 +227,9 @@ local function BuildIcons(container)
 end
 
 -------------------------------------------------------------------------------
--- Header: TidyMap's own zone name and clock, the same options for both
--------------------------------------------------------------------------------
-local function HeaderOn() return ns.P.enabled end
-
-local function PieceCard(page, col, key, title)
-    local function C() return ns.P.header[key] end
-    local function Get(k) return function() return C()[k] end end
-    local function Set(k) return function(v) C()[k] = v ns.ApplyAll() end end
-    local shown = Both(HeaderOn, function() return C().mode ~= "hide" end)
-
-    local card = page:Add(col, UI.Card(page.content, title))
-    card:Add(UI.Segmented(card, L["Show"], MODES(), Get("mode"), Set("mode"), { enableIf = HeaderOn }))
-    card:Add(UI.Segmented(card, L["Place"], { { "top", L["Top"] }, { "bottom", L["Bottom"] } },
-        Get("place"), Set("place"), { enableIf = shown }))
-    card:Add(UI.Segmented(card, L["Side"], { { "outside", L["Outside"] }, { "inside", L["Inside"] } },
-        Get("side"), Set("side"), { enableIf = shown }))
-    card:Add(UI.Slider(card, L["Distance"], -10, 40, 1, Get("offset"), Set("offset"),
-        { format = UI.px, enableIf = shown }))
-    card:Add(UI.Segmented(card, L["Background"], { { "none", L["None"] }, { "flat", L["Flat"] }, { "pill", L["Pill"] } },
-        Get("bg"), Set("bg"), { enableIf = shown }))
-    PlateRows(card, C, Both(shown, function() return C().bg ~= "none" end), function() return C().bg == "flat" end)
-    if key == "coords" then
-        card:Add(UI.Segmented(card, L["Decimals"], { { 0, "0" }, { 1, "1" }, { 2, "2" } },
-            Get("decimals"), Set("decimals"), { enableIf = shown }))
-    end
-end
-
-local function BuildHeader(container)
-    local page = UI.Page(container, 2)
-
-    PieceCard(page, 1, "zone", L["Zone"])
-    PieceCard(page, 2, "clock", L["Clock"])
-    PieceCard(page, 1, "coords", L["Coordinates"])
-
-    page:Layout()
-end
-
--------------------------------------------------------------------------------
--- Texts: every text of the map with its whole look: font, size, outline,
--- shadow (color, offset) and color. Where and on what background they sit
--- is on the Header page.
+-- Texts: every text of the map (Blizzard's zone, clock and coordinates)
+-- with its whole look: font, size, outline, shadow (color, offset) and
+-- color. Where and on what background they sit is on the Icons page.
 -------------------------------------------------------------------------------
 local OUTLINES = function()
     return { { "", L["None"] }, { "OUTLINE", L["Thin"] }, { "THICKOUTLINE", L["Thick"] } }
@@ -274,8 +240,8 @@ local function TextCard(page, col, key, title)
     local function C() return ns.P.texts[key] end
     local function Get(k) return function() return C()[k] end end
     local function Set(k) return function(v) C()[k] = v ns.ApplyAll() end end
-    -- greyed while its piece is hidden (Header page)
-    local shown = Both(On, function() return ns.P.header[key].mode ~= "hide" end)
+    -- greyed while its icon is hidden (Icons page)
+    local shown = Both(On, function() return ns.ElementMode(key) ~= "hide" end)
 
     local card = page:Add(col, UI.Card(page.content, title))
     card:Add(UI.Dropdown(card, L["Font"], function() return UI.MediaList("font") end,
@@ -481,7 +447,6 @@ local function Build()
     win = UI.Window({ name = "TidyMapOptions", title = "TidyMap", version = ns.version,
         logo = "Interface\\AddOns\\TidyMap\\Media\\Icon", width = 640, height = 470, navWidth = 110 })
     win:AddNav("look", L["Look"], BuildLook)
-    win:AddNav("header", L["Header"], BuildHeader)
     win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("texts", L["Texts"], BuildTexts)
     win:AddNav("addons", L["Addons"], BuildAddons)
@@ -519,11 +484,4 @@ function ns.SelectElement(key)
     if not win:IsShown() then win:Show() end
     win:Select("icons")
     UI.RefreshAll()
-end
-
--- A header piece clicked or dragged on the map: one page of the window
-function ns.OpenPage(key)
-    if not win then Build() end
-    if not win:IsShown() then win:Show() end
-    win:Select(key)
 end

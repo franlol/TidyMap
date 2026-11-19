@@ -19,7 +19,7 @@ if ns.version:find("^@") then ns.version = "dev" end
 local function C(r, g, b, a) return { r = r, g = g, b = b, a = a or 1 } end
 ns.ACCENT = { 0.96, 0.72, 0.32 }
 
--- the plate behind an icon or a header piece (flat look): its padding, its
+-- the plate behind an icon (flat look): its padding, its
 -- border (0 = none; the map's border color or its own) and its color
 local function Plate(t)
     t.pad = t.pad or 2
@@ -42,11 +42,6 @@ local function Text(size, t)
     t.shadowColor = C(0, 0, 0, 1)
     t.shadowX, t.shadowY = 1, -1
     return t
-end
-local function Piece(t)
-    t.offset = t.offset or 0
-    t.pad = 0
-    return Plate(t)
 end
 
 ns.defaults = {
@@ -77,22 +72,13 @@ ns.defaults = {
         daynight = Icon(64, 0),
         coords = Icon(270, -14),
     },
-    -- the texts on and around the map: one font, a size each
-    -- each text of the map: font, size, outline, shadow (its color and
-    -- offset) and color (the zone can use Blizzard's PvP colors instead)
+    -- each text of the map (Blizzard's zone, clock and coordinates): font,
+    -- size, outline, shadow (its color and offset) and color (the zone can
+    -- keep Blizzard's PvP colors instead)
     texts = {
         zone = Text(12, { pvp = true, color = C(1, 0.82, 0, 1) }),
         clock = Text(12, { color = C(1, 1, 1, 1) }),
         coords = Text(10, { color = C(1, 1, 1, 1) }),
-    },
-    -- TidyMap's header: its own zone name, clock and coordinates (while
-    -- TidyMap is on, Blizzard's stay hidden). Each piece: shown / on hover / hidden, top or
-    -- bottom, outside or inside the map, extra distance, background (none,
-    -- flat, pill) and its color, text color (zone: Blizzard's PvP colors)
-    header = {
-        zone = Piece({ mode = "show", place = "top", side = "outside", bg = "pill" }),
-        clock = Piece({ mode = "show", place = "bottom", side = "outside", bg = "pill" }),
-        coords = Piece({ mode = "hover", place = "bottom", side = "inside", bg = "none", decimals = 1 }),
     },
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true)
@@ -190,8 +176,6 @@ end
 -- Older settings in the current form
 local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
 local function Migrate(p)
-    -- the header has no switch of its own any more
-    if type(p.header) == "table" then p.header.on = nil end
     -- one font / outline and a size per text became a full style per text
     -- (the text colors moved here from the header pieces)
     local t = p.texts
@@ -204,6 +188,15 @@ local function Migrate(p)
             h.color, h.pvp = nil, nil
         end
         p.texts = new
+    end
+    -- TidyMap's own header is gone: zone, clock and coordinates are
+    -- Blizzard's icons again, shown / on hover / hidden as the header had them
+    if type(p.header) == "table" then
+        for _, key in ipairs({ "zone", "clock", "coords" }) do
+            local h, e = p.header[key], type(p.elements) == "table" and p.elements[key]
+            if type(h) == "table" and type(e) == "table" and h.mode then e.mode = h.mode end
+        end
+        p.header = nil
     end
     -- the zoom on / off became a choice
     if type(p.zoom) == "table" and p.zoom.auto ~= nil then

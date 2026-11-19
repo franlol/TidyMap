@@ -1,13 +1,14 @@
 -------------------------------------------------------------------------------
 -- TidyMap - Blizzard's icons around the minimap (zone, clock, calendar,
--- tracking, mail, addon menu, day / night)
+-- tracking, mail, addon menu, day / night, coordinates)
 --
 -- Each one sits on the edge of the map's shape, at an angle, and is shown,
 -- shown on hover or hidden. Plain frame calls only: SetPoint to place them,
 -- SetAlpha to fade them (so Blizzard's own Show / Hide still decide when
 -- they exist, e.g. mail), and the places Blizzard re-anchors them are
--- followed with hooksecurefunc. Turned off, every icon gets its own place
--- back.
+-- followed with hooksecurefunc. The texts (zone, clock, coordinates) are
+-- Blizzard's own font strings in the Texts page's style. Turned off, every
+-- icon gets its own place and look back.
 -------------------------------------------------------------------------------
 
 local _, ns = ...
@@ -70,39 +71,15 @@ function ns.ElementFrame(key)
     return e and e.frame()
 end
 
--- Effective mode: Clean mode turns "show" into "hover"
--- Clean mode turns "show" into "hover" (icons and header pieces alike)
-function ns.EffectiveMode(m)
+-- The mode an icon is in: Clean mode turns "show" into "hover". The
+-- coordinates only exist while the game's own option shows them.
+function ns.ElementMode(key)
+    if key == "coords" and not C_CVar.GetCVarBool("minimapShowPlayerCoords") then return "hide" end
+    local m = ns.P.elements[key].mode
     if m == "show" and ns.P.clean then return "hover" end
     return m
 end
 
--- Blizzard's zone, clock and coordinates: TidyMap's header replaces them
--- while TidyMap is on (they only come back with Blizzard's look)
-local HEADER = { zone = true, clock = true, coords = true }
-function ns.InHeader(key) return HEADER[key] or false end
-
--- The icons the Icons page lists (not the header's)
-local icons
-function ns.IconList()
-    if not icons then
-        icons = {}
-        for _, e in ipairs(ns.ELEMENTS) do
-            if not HEADER[e.key] then icons[#icons + 1] = e end
-        end
-    end
-    return icons
-end
-
-function ns.ElementMode(key)
-    if ns.InHeader(key) then return "hide" end
-    return ns.EffectiveMode(ns.P.elements[key].mode)
-end
-
--- Other frames that fade like the "on hover" icons (the header pieces):
--- { frame, mode = function() return "show" / "hover" / "hide" end }
-ns.faders = {}
-function ns.HoverAlpha() return alpha end
 function ns.IsEditing() return editing end
 
 local function Save(f)
@@ -193,6 +170,51 @@ local function PaintPlate(e, f, flat)
     end
 end
 
+-------------------------------------------------------------------------------
+-- Texts: Blizzard's font strings in the Texts page's style. The zone keeps
+-- Blizzard's PvP colors unless a color of its own is picked.
+-------------------------------------------------------------------------------
+local fonts = {}   -- [font string] = Blizzard's own look
+
+local function StyleText(e, f, on)
+    local fs = e.text and e.text(f)
+    if not fs then return end
+    local b = fonts[fs]
+    if not b then
+        b = { font = { fs:GetFont() }, shadow = { fs:GetShadowColor() }, offset = { fs:GetShadowOffset() },
+            color = { fs:GetTextColor() } }
+        fonts[fs] = b
+    end
+    local t = on and ns.P.texts[e.key]
+    if t then
+        Flaty.SetFontFile(fs, t.font, t.size, t.outline)
+        if t.shadow then
+            local s = t.shadowColor
+            fs:SetShadowColor(s.r, s.g, s.b, s.a or 1)
+            fs:SetShadowOffset(t.shadowX, t.shadowY)
+        else
+            fs:SetShadowOffset(0, 0)
+        end
+    else
+        fs:SetFont(unpack(b.font))
+        fs:SetShadowColor(unpack(b.shadow))
+        fs:SetShadowOffset(unpack(b.offset))
+    end
+    if e.key == "zone" then
+        -- Blizzard's colors come from its own update
+        if t and not t.pvp then
+            local c = t.color
+            fs:SetTextColor(c.r, c.g, c.b, c.a or 1)
+        elseif Minimap_Update then
+            Minimap_Update()
+        end
+    elseif t then
+        fs:SetTextColor(t.color.r, t.color.g, t.color.b, t.color.a or 1)
+    else
+        fs:SetTextColor(unpack(b.color))
+    end
+end
+
 local function SetMouse(e, f, on)
     local list = { f }
     if e.buttons then
@@ -218,12 +240,6 @@ local function Place(e, f)
 end
 
 local function Paint(e, f)
-    -- replaced by TidyMap's header: gone, even while moving icons
-    if ns.InHeader(e.key) then
-        f:SetAlpha(0)
-        SetMouse(e, f, false)
-        return
-    end
     local mode = ns.ElementMode(e.key)
     if editing then
         f:SetAlpha(mode == "hide" and 0.35 or 1)
@@ -248,11 +264,13 @@ local function ApplyOne(e)
         f:SetFrameLevel(math.max(saved[f].level, Minimap:GetFrameLevel() + 5))
         Place(e, f)
         Paint(e, f)
+        StyleText(e, f, true)
         Decor(e, f, s.look ~= "flat")
         PaintPlate(e, f, s.look == "flat")
     else
         Restore(f)
         SetMouse(e, f, true)
+        StyleText(e, f, false)
         Decor(e, f, true)
         PaintPlate(e, f, false)
     end
@@ -274,7 +292,6 @@ ns.ApplyElements = Apply
 function ns.SetElementsEditing(on)
     editing = on and true or false
     Apply()
-    if ns.ApplyHeader then ns.ApplyHeader() end
     if ns.ApplyVisibility then ns.ApplyVisibility() end
 end
 
@@ -289,9 +306,6 @@ local function MouseNear()
     for _, e in ipairs(ns.ELEMENTS) do
         local f = e.frame()
         if f and f:IsVisible() and f:IsMouseOver() then return true end
-    end
-    for _, x in ipairs(ns.faders) do
-        if x.frame:IsVisible() and x.frame:IsMouseOver() then return true end
     end
     return false
 end
@@ -310,9 +324,6 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     for _, e in ipairs(ns.ELEMENTS) do
         local f = e.frame()
         if f and ns.ElementMode(e.key) == "hover" then f:SetAlpha(alpha) end
-    end
-    for _, x in ipairs(ns.faders) do
-        if x.mode() == "hover" then x.frame:SetAlpha(alpha) end
     end
 end)
 
@@ -334,12 +345,26 @@ local function Start()
     if EditModeManagerFrame and EditModeManagerFrame.ExitEditMode then
         hooksecurefunc(EditModeManagerFrame, "ExitEditMode", Again)
     end
+    -- the zone's own color, after Blizzard sets its PvP color
+    if Minimap_Update then
+        hooksecurefunc("Minimap_Update", function()
+            local t = On() and ns.P.texts.zone
+            if t and not t.pvp and MinimapZoneText then
+                MinimapZoneText:SetTextColor(t.color.r, t.color.g, t.color.b, t.color.a or 1)
+            end
+        end)
+    end
     local f = CreateFrame("Frame")
     f:RegisterEvent("ADDON_LOADED")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
+    f:RegisterEvent("CVAR_UPDATE")
     f:SetScript("OnEvent", function(_, event, name)
-        -- the clock exists once its addon loads
-        if event == "PLAYER_ENTERING_WORLD" or name == "Blizzard_TimeManager" then Apply() end
+        -- the clock exists once its addon loads; the coordinates follow the
+        -- game's option
+        if event == "PLAYER_ENTERING_WORLD" or name == "Blizzard_TimeManager"
+            or (event == "CVAR_UPDATE" and (name == "minimapShowPlayerCoords" or name == "coordsByTenths")) then
+            Apply()
+        end
     end)
     -- flat look under texts (zone, clock, coordinates): it follows the text
     C_Timer.NewTicker(1, function()

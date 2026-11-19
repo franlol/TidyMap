@@ -41,17 +41,8 @@ ns.translations.esES = {
     ["Class color"] = "Color de clase",
     ["Color"] = "Color",
 
-    -- Header
-    ["Header"] = "Cabecera",
+    -- Icons: plates and texts
     ["Decimals"] = "Decimales",
-    ["Place"] = "Lugar",
-    ["Top"] = "Arriba",
-    ["Bottom"] = "Abajo",
-    ["Side"] = "Lado",
-    ["Outside"] = "Fuera",
-    ["Inside"] = "Dentro",
-    ["Background"] = "Fondo",
-    ["Pill"] = "Píldora",
     ["Background color"] = "Color del fondo",
     ["PvP colors"] = "Colores JcJ",
     ["Text color"] = "Color del texto",
@@ -83,8 +74,6 @@ ns.translations.esES = {
     ["All icons"] = "Todos los iconos",
     ["Reset all icons"] = "Restablecer todos los iconos",
     ["Drag along the edge · Click for its settings"] = "Arrastra por el borde · Clic para sus opciones",
-    ["Drag above or below the map, inside or outside · Click for the header settings"] =
-        "Arrastra arriba o abajo del mapa, dentro o fuera · Clic para las opciones de la cabecera",
     ["Zone"] = "Zona",
     ["Clock"] = "Reloj",
     ["Calendar"] = "Calendario",

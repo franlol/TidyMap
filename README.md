@@ -5,15 +5,14 @@ A clean, shaped minimap for WoW Forever, built with
 
 - **Styles in one click:** Clean, Classic, Glow, Minimal. Then fine-tune.
 - **Corners** from square to round, in 1% steps.
-- **Blizzard's icons on the edge** (zone, clock, calendar, tracking, mail, addon menu,
-  day / night): shown, on hover or hidden, at any angle. With the options open, drag
-  them along the edge or click one to open its settings.
+- **Blizzard's icons on the edge** (zone, clock, coordinates, calendar, tracking, mail,
+  addon menu, day / night): shown, on hover or hidden, at any angle. Unlock them to
+  drag them along the edge, or click one to open its settings.
 - **Clean mode:** icons only while the mouse is over the map.
-- **Header:** TidyMap's own zone name, clock and coordinates (0-2 decimals): shown, on
-  hover or hidden, top or bottom, outside or inside, flat or pill background.
 - **Icon look:** flat (dark plate in the map's corner shape) or Blizzard's, any size.
 - **Visibility:** always, only out of combat or only in combat, with fade and opacity.
-- **Texts:** one font for every text of the map, a size each.
+- **Texts:** font, size, outline, shadow and color for the zone, clock and coordinates
+  (Blizzard's own texts; the zone can keep its PvP colors).
 - **Addon buttons** (LibDBIcon): flat look, and any of them can move into the
   addon menu on the map instead.
 - **Flat border** in any color (or your class color), and an optional **glow**.
