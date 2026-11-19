@@ -32,6 +32,7 @@ local function Cancel()
 end
 
 local function OnZoom()
+    if ns.redrawingZoom then return end   -- Visibility.lua redrawing the map
     Cancel()
     if not On() then return end
     if Mode() == "remember" then

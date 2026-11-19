@@ -31,11 +31,22 @@ end
 
 -- Fully gone: no clicks, and the map itself hidden (only that takes the
 -- tracking icons away)
+-- Shown again, the map stays blank until its zoom changes: one step and
+-- back (Zoom.lua ignores it)
+local function Redraw()
+    local z = Minimap:GetZoom()
+    ns.redrawingZoom = true
+    Minimap:SetZoom(z > 0 and z - 1 or z + 1)
+    Minimap:SetZoom(z)
+    ns.redrawingZoom = false
+end
+
 local function SetMapMouse(on)
     if on == not mouseOff then return end
     Minimap:EnableMouse(on)
     Minimap:EnableMouseWheel(on)
     Minimap:SetShown(on)
+    if on then Redraw() end
     mouseOff = not on
 end
 
