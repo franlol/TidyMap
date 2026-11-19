@@ -345,10 +345,11 @@ local function BuildAddons(container)
     g, s = Bind("buttons", "border")
     local flatOn = Both(Both(has, ns.CanFlattenButtons), function() return ns.P.buttons.flat end)
     card:Add(UI.Check(card, L["Black border"], g, s, { sub = true, enableIf = flatOn }))
-    g, s = Bind("buttons", "borderShape")
-    card:Add(UI.Segmented(card, L["Shape"], {
-        { "square", L["Square"] }, { "rounded", L["Rounded"] }, { "round", L["Round"] },
-    }, g, s, { sub = true, enableIf = Both(flatOn, function() return ns.P.buttons.border end) }))
+    local bordered = Both(flatOn, function() return ns.P.buttons.border end)
+    g, s = Bind("buttons", "borderSize")
+    card:Add(UI.Slider(card, L["Size"], 1, 4, 1, g, s, { sub = true, format = UI.px, enableIf = bordered }))
+    g, s = Bind("buttons", "borderCorners")
+    card:Add(UI.Slider(card, L["Corners"], 0, 100, 5, g, s, { sub = true, format = Pct, enableIf = bordered }))
 
     card = page:Add(2, UI.Card(page.content, L["Into the addon menu"],
         L["Checked buttons leave the map and wait in the addon menu."]))

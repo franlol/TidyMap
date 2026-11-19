@@ -84,7 +84,7 @@ ns.defaults = {
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true); hover: only on hover (Clean
     -- mode does it too)
-    buttons = { flat = true, border = false, borderShape = "square", hover = false, menu = {} },
+    buttons = { flat = true, border = false, borderCorners = 0, borderSize = 1, hover = false, menu = {} },
 }
 
 -- Icons unlocked (dragged on the map): for this session only, every login
@@ -205,6 +205,12 @@ local function Migrate(p)
             if type(h) == "table" and type(e) == "table" and h.mode then e.mode = h.mode end
         end
         p.header = nil
+    end
+    -- the addon buttons' black border: a shape became corners (%)
+    if type(p.buttons) == "table" and p.buttons.borderShape then
+        local CORNERS = { square = 0, rounded = 50, round = 100 }
+        p.buttons.borderCorners = p.buttons.borderCorners or CORNERS[p.buttons.borderShape]
+        p.buttons.borderShape = nil
     end
     -- the map's opacities are gone (hidden is fully hidden)
     if type(p.visibility) == "table" then
