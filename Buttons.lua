@@ -13,7 +13,9 @@
 local _, ns = ...
 
 local function On() return ns.P and ns.P.enabled end
-local BLACK = "Interface\\AddOns\\TidyMap\\Media\\Black"
+-- the black border behind flat buttons, by shape
+local MEDIA = "Interface\\AddOns\\TidyMap\\Media\\"
+local BLACK = { square = MEDIA .. "Black", rounded = MEDIA .. "BlackRounded", round = MEDIA .. "BlackRound" }
 local function DBI() return LibStub("LibDBIcon-1.0", true) end
 
 -- what TidyMap changed, per button name (to undo only that)
@@ -54,12 +56,14 @@ local function ApplyButton(dbi, name)
         if on and P.flat then
             dbi:RemoveButtonBorder(name)
             if P.border then
-                -- a black square 1 px past the icon on every side, behind it
-                -- (LibDBIcon's icon: 18 px centered, or 17 px at 7, -6)
+                -- a black square, rounded square or circle 1 px past the
+                -- icon on every side, behind it (LibDBIcon's icon: 18 px
+                -- centered, or 17 px at 7, -6)
+                local tex = BLACK[P.borderShape] or BLACK.square
                 if dbi:IsButtonCompartmentAvailable() then
-                    dbi:SetButtonBackground(name, BLACK, 20, "CENTER", 0, 0)
+                    dbi:SetButtonBackground(name, tex, 20, "CENTER", 0, 0)
                 else
-                    dbi:SetButtonBackground(name, BLACK, 19, "TOPLEFT", 6, -5)
+                    dbi:SetButtonBackground(name, tex, 19, "TOPLEFT", 6, -5)
                 end
             else
                 dbi:RemoveButtonBackground(name)

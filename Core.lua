@@ -84,7 +84,7 @@ ns.defaults = {
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true); hover: only on hover (Clean
     -- mode does it too)
-    buttons = { flat = true, border = false, hover = false, menu = {} },
+    buttons = { flat = true, border = false, borderShape = "square", hover = false, menu = {} },
 }
 
 -- Icons unlocked (dragged on the map): for this session only, every login
