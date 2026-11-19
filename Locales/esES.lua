@@ -77,11 +77,8 @@ ns.translations.esES = {
     ["Padding"] = "Margen",
     ["Corners like the map"] = "Esquinas como el mapa",
     ["Unlock icons"] = "Desbloquear iconos",
-    ["Lock icons"] = "Bloquear iconos",
-    ["Unlocked: drag any icon along the edge of the map, other addons' buttons too. Their clicks wait until locked again."] =
-        "Desbloqueados: arrastra cualquier icono por el borde del mapa, también los botones de otros addons. Sus clics esperan a que vuelvan a bloquearse.",
-    ["Drag them along the edge of the map, or click one for its settings."] =
-        "Arrástralos por el borde del mapa, o haz clic en uno para sus opciones.",
+    ["Drag any icon on the map, other addons' buttons too, or click one for its settings."] =
+        "Arrastra cualquier icono del mapa, también los botones de otros addons, o haz clic en uno para sus opciones.",
     ["Border color like the map"] = "Color de borde como el mapa",
     ["Border color"] = "Color del borde",
     ["All icons"] = "Todos los iconos",
