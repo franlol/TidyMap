@@ -155,7 +155,8 @@ local function PaintPlate(e, f, flat)
     end
     local s = ns.P.elements[e.key]
     w, h = math.max(2, w + 2 * s.pad), math.max(2, h + 2 * s.pad)
-    local mask = Flaty.GetShape(Flaty.Rounded(ns.PlateCorners(s))).mask
+    local key = Flaty.Rounded(ns.PlateCorners(s))
+    local mask = Flaty.GetShape(key).mask
     local bg = s.bgColor
     p.bg:SetTexture(mask)
     p.bg:SetVertexColor(bg.r, bg.g, bg.b, bg.a or 1)
@@ -166,11 +167,18 @@ local function PaintPlate(e, f, flat)
     local c = ns.PlateEdgeColor(s)
     p.edge:SetShown(c ~= nil)
     if c then
-        p.edge:SetTexture(mask)
         p.edge:SetVertexColor(c[1], c[2], c[3], c[4])
         p.edge:SetSize(w + 2 * s.edge, h + 2 * s.edge)
         p.edge:ClearAllPoints()
         p.edge:SetPoint("CENTER", anchor, "CENTER")
+        -- a ring around the plate (nothing under a see-through background);
+        -- older lib copies: the whole shape behind it
+        if Flaty.SetShapeRing then
+            p.edge:SetTexture("Interface\\Buttons\\WHITE8X8")
+            Flaty.SetShapeRing(p.edge, key, s.edge)
+        else
+            p.edge:SetTexture(mask)
+        end
     end
 end
 

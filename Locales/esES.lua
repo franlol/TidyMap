@@ -43,6 +43,7 @@ ns.translations.esES = {
 
     -- Icons: plates and texts
     ["Decimals"] = "Decimales",
+    ["Black border"] = "Borde negro",
     ["Background"] = "Fondo",
     ["Background color"] = "Color del fondo",
     ["PvP colors"] = "Colores JcJ",
