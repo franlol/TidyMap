@@ -229,12 +229,13 @@ end
 -------------------------------------------------------------------------------
 -- Texts: every text of the map (Blizzard's zone, clock and coordinates)
 -- with its whole look: font, size, outline, shadow (color, offset) and
--- color. Where and on what background they sit is on the Icons page.
+-- color, and its background (the same plate as on the Icons page).
 -------------------------------------------------------------------------------
 local OUTLINES = function()
     return { { "", L["None"] }, { "OUTLINE", L["Thin"] }, { "THICKOUTLINE", L["Thick"] } }
 end
 local STYLE_KEYS = { "font", "outline", "shadow", "shadowX", "shadowY" }
+local PLATE_KEYS = { "look", "pad", "mapCorners", "corners", "edge", "mapColor", "edgeColor", "bgColor" }
 
 local function TextCard(page, col, key, title)
     local function C() return ns.P.texts[key] end
@@ -264,6 +265,18 @@ local function TextCard(page, col, key, title)
         card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
             { alpha = true, enableIf = shown }))
     end
+
+    -- its background: the icon's flat plate (the same settings as on the
+    -- Icons page), or Blizzard's own art
+    local function E() return ns.P.elements[key] end
+    card:Add(UI.Heading(card, L["Background"]))
+    card:Add(UI.Segmented(card, L["Look"], { { "flat", L["Flat"] }, { "blizzard", "Blizzard" } },
+        function() return E().look end, function(v)
+            E().look = v
+            ns.ApplyElement(key)
+        end, { enableIf = shown }))
+    PlateRows(card, E, Both(shown, function() return E().look == "flat" end))
+
     -- font, outline and shadow to the other texts (they keep size and color)
     card:Add(UI.Buttons(card, {
         { L["Use this style for all texts"], function()
@@ -282,6 +295,9 @@ local function TextCard(page, col, key, title)
     card:Add(UI.Buttons(card, {
         { L["Reset this text"], function()
             ns.P.texts[key] = ns.Copy(ns.defaults.texts[key])
+            -- its background too (where it sits stays)
+            local d = ns.defaults.elements[key]
+            for _, k in ipairs(PLATE_KEYS) do E()[k] = ns.Copy(d[k]) end
             ns.ApplyAll()
             UI.RefreshAll()
         end, "danger", confirm = true },
