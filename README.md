@@ -9,11 +9,16 @@ A clean, shaped minimap for WoW Forever, built with
   day / night): shown, on hover or hidden, at any angle. With the options open, drag
   them along the edge or click one to open its settings.
 - **Clean mode:** icons only while the mouse is over the map.
-- **Texts:** one font for zone, clock and coordinates, a size each.
+- **Header:** TidyMap's own zone name, clock and coordinates (0-2 decimals): shown, on
+  hover or hidden, top or bottom, outside or inside, flat or pill background.
+- **Icon look:** flat (dark plate in the map's corner shape) or Blizzard's, any size.
+- **Visibility:** always, only out of combat or only in combat, with fade and opacity.
+- **Texts:** one font for every text of the map, a size each.
 - **Addon buttons** (LibDBIcon): flat look, and any of them can move into the
   addon menu on the map instead.
 - **Flat border** in any color (or your class color), and an optional **glow**.
-- **Zoom out by itself** a few seconds after you zoom in (the mouse wheel zooms).
+- **Zoom:** back out by itself after a few seconds, or remember your level (the mouse
+  wheel zooms).
 - Changes show at once on the real minimap.
 - Profiles, English and Spanish.
 

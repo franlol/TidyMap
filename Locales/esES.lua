@@ -118,8 +118,10 @@ ns.translations.esES = {
     ["Faded opacity"] = "Opacidad atenuada",
     ["Fade time"] = "Tiempo de fundido",
     ["Show it with the mouse over"] = "Mostrarlo con el ratón encima",
-    ["After you zoom in with the mouse wheel, the map zooms back out by itself."] =
-        "Tras acercar el mapa con la rueda del ratón, vuelve a alejarse solo.",
+    ["The mouse wheel zooms the map."] = "La rueda del ratón acerca y aleja el mapa.",
+    ["After zooming in"] = "Tras acercar",
+    ["Remember"] = "Recordar",
+    ["Leave it"] = "Dejarlo",
     ["Zoom back out"] = "Volver a alejar",
     ["After"] = "Tras",
     ["Minimap icon"] = "Icono en el minimapa",

@@ -341,14 +341,15 @@ end
 local function BuildMap(container)
     local page = UI.Page(container, 2)
 
-    local card = page:Add(1, UI.Card(page.content, L["Zoom"],
-        L["After you zoom in with the mouse wheel, the map zooms back out by itself."]))
-    local g, s = Bind("zoom", "auto")
-    card:Add(UI.Check(card, L["Zoom back out"], g, s, { enableIf = On }))
+    local card = page:Add(1, UI.Card(page.content, L["Zoom"], L["The mouse wheel zooms the map."]))
+    local g, s = Bind("zoom", "mode")
+    card:Add(UI.Segmented(card, L["After zooming in"], {
+        { "out", L["Zoom back out"] }, { "remember", L["Remember"] }, { "blizzard", L["Leave it"] },
+    }, g, s, { enableIf = On }))
     g, s = Bind("zoom", "delay")
     card:Add(UI.Slider(card, L["After"], 3, 60, 1, g, s, { sub = true,
         format = function(v) return ("%d s"):format(v) end,
-        enableIf = Both(On, function() return ns.P.zoom.auto end) }))
+        enableIf = Both(On, function() return ns.P.zoom.mode == "out" end) }))
     g, s = Bind("zoom", "buttons")
     card:Add(UI.Check(card, L["Zoom buttons on hover"], g, s, { enableIf = On }))
 

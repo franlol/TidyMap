@@ -24,7 +24,8 @@ ns.defaults = {
     corners = 8,        -- 0 square ... 100 round (%)
     border = { size = 1, color = C(0, 0, 0, 1), class = false },
     glow = { on = false, color = C(0.96, 0.72, 0.32, 0.6) },
-    zoom = { auto = true, delay = 10, buttons = true },
+    -- after a zoom in: "out" (back out after delay s), "remember" or "blizzard"
+    zoom = { mode = "out", delay = 10, buttons = true },
     clean = false,      -- every shown icon only on hover
     -- the whole minimap by situation: always, only out of combat or only in
     -- combat; its opacity when shown and when faded, fade time, and whether
@@ -157,6 +158,11 @@ end
 -- Older settings in the current form
 local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
 local function Migrate(p)
+    -- the zoom on / off became a choice
+    if type(p.zoom) == "table" and p.zoom.auto ~= nil then
+        p.zoom.mode = p.zoom.mode or (p.zoom.auto and "out" or "blizzard")
+        p.zoom.auto = nil
+    end
     if type(p.shape) == "string" then
         p.corners = p.corners or OLD_SHAPES[p.shape]
         p.shape = nil
