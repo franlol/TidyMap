@@ -77,8 +77,9 @@ ns.translations.esES = {
     ["Padding"] = "Margen",
     ["Corners like the map"] = "Esquinas como el mapa",
     ["Unlock icons"] = "Desbloquear iconos",
-    ["Drag any icon on the map, other addons' buttons too, or click one for its settings."] =
-        "Arrastra cualquier icono del mapa, también los botones de otros addons, o haz clic en uno para sus opciones.",
+    ["Drag any icon on the map, or click one for its settings."] =
+        "Arrastra cualquier icono del mapa o haz clic en uno para sus opciones.",
+    ["Lock buttons"] = "Bloquear botones",
     ["Border color like the map"] = "Color de borde como el mapa",
     ["Border color"] = "Color del borde",
     ["All icons"] = "Todos los iconos",

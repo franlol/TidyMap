@@ -345,6 +345,8 @@ local function BuildAddons(container)
     card:Add(UI.Slider(card, L["Size"], 1, 4, 1, g, s, { sub = true, format = UI.px, enableIf = bordered }))
     g, s = Bind("buttons", "borderCorners")
     card:Add(UI.Slider(card, L["Corners"], 0, 100, 5, g, s, { sub = true, format = Pct, enableIf = bordered }))
+    g, s = Bind("buttons", "lock")
+    card:Add(UI.Check(card, L["Lock buttons"], g, s, { enableIf = has }))
 
     card = page:Add(2, UI.Card(page.content, L["Into the addon menu"],
         L["Checked buttons leave the map and wait in the addon menu."]))
@@ -557,13 +559,13 @@ local function Build()
         win:SetStatus(other and ("|cffff7359" .. L["%s is also loaded: both change the minimap. Disable one of them and reload."]:format(other) .. "|r") or "")
     end
     -- "Unlock icons" (window header, on every page): outlines on the map's
-    -- icons, to drag them (other addons' buttons too, their clicks waiting
-    -- until locked again) or click them; locked again at the next login
+    -- icons, to drag them or click them; locked again at the next login.
+    -- Other addons' buttons have their own lock (Addons page)
     win:AddHeaderButton(L["Unlock icons"], function()
         ns.unlocked = not ns.unlocked
         ns.ApplyAll()
         UI.RefreshAll()
-    end, function() return ns.unlocked end, L["Drag any icon on the map, other addons' buttons too, or click one for its settings."])
+    end, function() return ns.unlocked end, L["Drag any icon on the map, or click one for its settings."])
     win:Select("look")
 end
 

@@ -6,7 +6,7 @@
 --     menu on the map collects them)
 --   · flat look: RemoveButtonBorder / RemoveButtonBackground
 --   · Clean mode or "on hover": ShowOnEnter (they show with the mouse over the map)
---   · Lock icons: Lock / Unlock
+--   · Lock buttons (own setting, apart from the header's Unlock icons): Lock / Unlock
 -- Whatever TidyMap changed is undone when it is turned off or unchecked.
 -------------------------------------------------------------------------------
 
@@ -79,11 +79,11 @@ local function ApplyButton(dbi, name)
         end
     end
 
-    -- Lock icons: TidyMap locks only the ones not locked already (by their
-    -- addon), and unlocks only the ones it locked
+    -- Lock buttons (Addons page): TidyMap locks only the ones not locked
+    -- already (by their addon), and unlocks only the ones it locked
     if dbi.Lock then
         local mine = Locked()
-        if on and not ns.unlocked then
+        if on and P.lock then
             if not mine[name] and not (b.db and b.db.lock) then
                 dbi:Lock(name)
                 mine[name] = true
