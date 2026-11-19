@@ -326,7 +326,10 @@ end
 -- "On hover": fade in while the mouse is over the map or its icons
 -------------------------------------------------------------------------------
 local MARGIN = 28     -- around the map, where the icons sit
-local FADE = 0.2      -- seconds for a full fade
+-- Same timing as LibDBIcon's buttons (Clean mode), so all icons go together:
+-- shown at once, kept 1 s after the mouse leaves, then a 0.2 s fade
+local HOLD = 1
+local FADE = 0.2
 
 local function MouseNear()
     if Minimap:IsMouseOver(MARGIN, -MARGIN, -MARGIN, MARGIN) then return true end
@@ -338,16 +341,23 @@ local function MouseNear()
 end
 
 local driver = CreateFrame("Frame")
-local wait = 0
+local wait, away = 0, 0
 driver:SetScript("OnUpdate", function(_, elapsed)
     if not On() or editing then return end
     wait = wait + elapsed
     if wait < 0.05 then return end
-    local step = wait / FADE
+    local step = wait
     wait = 0
-    local target = MouseNear() and 1 or 0
-    if alpha == target then return end
-    alpha = target > alpha and math.min(1, alpha + step) or math.max(0, alpha - step)
+    local new
+    if MouseNear() then
+        away, new = 0, 1
+    else
+        away = away + step
+        if away < HOLD then return end
+        new = math.max(0, alpha - step / FADE)
+    end
+    if alpha == new then return end
+    alpha = new
     for _, e in ipairs(ns.ELEMENTS) do
         local f = e.frame()
         if f and ns.ElementMode(e.key) == "hover" then f:SetAlpha(alpha) end
