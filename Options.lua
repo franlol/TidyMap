@@ -103,12 +103,18 @@ local MODE_TAG = {
 
 local function Sel() return ns.P.elements[ns.selected] end
 
--- The plate of the flat look (icons and header pieces alike): padding,
--- border size, border color (the map's or its own) and background color
-local function PlateRows(card, cfg, enableIf)
+-- The plate of the flat look (icons and header pieces alike): padding
+-- (negative: inside the picture's empty margins), corners (the map's or its
+-- own), border size, border color (the map's or its own), background color.
+-- cornersIf: corners apply (a pill has round ends of its own)
+local function PlateRows(card, cfg, enableIf, cornersIf)
     local function Get(k) return function() return cfg()[k] end end
     local function Set(k) return function(v) cfg()[k] = v ns.ApplyAll() end end
-    card:Add(UI.Slider(card, L["Padding"], 0, 10, 1, Get("pad"), Set("pad"), { format = UI.px, enableIf = enableIf }))
+    card:Add(UI.Slider(card, L["Padding"], -10, 10, 1, Get("pad"), Set("pad"), { format = UI.px, enableIf = enableIf }))
+    local shaped = cornersIf and Both(enableIf, cornersIf) or enableIf
+    card:Add(UI.Check(card, L["Map's corners"], Get("mapCorners"), Set("mapCorners"), { enableIf = shaped }))
+    card:Add(UI.Slider(card, L["Corners"], 0, 100, 1, Get("corners"), Set("corners"),
+        { sub = true, format = Pct, enableIf = Both(shaped, function() return not cfg().mapCorners end) }))
     card:Add(UI.Slider(card, L["Border"], 0, 4, 1, Get("edge"), Set("edge"), { format = UI.px, enableIf = enableIf }))
     local hasEdge = Both(enableIf, function() return cfg().edge > 0 end)
     card:Add(UI.Check(card, L["Map's border color"], Get("mapColor"), Set("mapColor"), { sub = true, enableIf = hasEdge }))
@@ -180,7 +186,9 @@ local function BuildIcons(container)
     card:Add(UI.Buttons(card, {
         { L["Reset this icon"], function()
             local d = ns.defaults.elements[ns.selected]
-            for _, k in ipairs({ "angle", "dist", "look", "size", "pad", "edge", "mapColor" }) do Sel()[k] = d[k] end
+            for _, k in ipairs({ "angle", "dist", "look", "size", "pad", "edge", "mapColor", "mapCorners", "corners" }) do
+                Sel()[k] = d[k]
+            end
             for _, k in ipairs({ "edgeColor", "bgColor" }) do
                 local c = d[k]
                 Sel()[k] = { r = c.r, g = c.g, b = c.b, a = c.a }
@@ -233,7 +241,7 @@ local function PieceCard(page, col, key, title)
         { format = UI.px, enableIf = shown }))
     card:Add(UI.Segmented(card, L["Background"], { { "none", L["None"] }, { "flat", L["Flat"] }, { "pill", L["Pill"] } },
         Get("bg"), Set("bg"), { enableIf = shown }))
-    PlateRows(card, C, Both(shown, function() return C().bg ~= "none" end))
+    PlateRows(card, C, Both(shown, function() return C().bg ~= "none" end), function() return C().bg == "flat" end)
     if key == "zone" then
         card:Add(UI.Check(card, L["PvP colors"], Get("pvp"), Set("pvp"), { enableIf = shown }))
         card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
@@ -477,8 +485,12 @@ local function Build()
         local other = ns.ConflictingAddon()
         win:SetStatus(other and ("|cffff7359" .. L["%s is also loaded: both change the minimap. Disable one of them and reload."]:format(other) .. "|r") or "")
     end
-    -- while the window is open, the icons can be dragged on the map
-    win:HookScript("OnShow", function() ns.SetEditing(true) end)
+    -- "Move icons" (window header): outlines on the map's icons, to drag
+    -- them along the edge or click them; off again when the window closes
+    win:AddHeaderButton(L["Move icons"], function()
+        ns.SetEditing(not ns.IsEditing())
+        UI.RefreshAll()
+    end, function() return ns.IsEditing() end, L["Drag them along the edge of the map, or click one for its settings."])
     win:HookScript("OnHide", function() ns.SetEditing(false) end)
     win:Select("look")
 end

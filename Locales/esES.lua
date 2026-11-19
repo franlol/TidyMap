@@ -76,6 +76,10 @@ ns.translations.esES = {
     ["Reset this icon"] = "Restablecer este icono",
     ["Flat"] = "Plano",
     ["Padding"] = "Margen",
+    ["Map's corners"] = "Esquinas del mapa",
+    ["Move icons"] = "Mover iconos",
+    ["Drag them along the edge of the map, or click one for its settings."] =
+        "Arrástralos por el borde del mapa, o haz clic en uno para sus opciones.",
     ["Map's border color"] = "Color del borde del mapa",
     ["Border color"] = "Color del borde",
     ["All icons"] = "Todos los iconos",

@@ -97,13 +97,15 @@ local function Save(f)
     if saved[f] then return end
     local points = {}
     for i = 1, f:GetNumPoints() do points[i] = { f:GetPoint(i) } end
-    saved[f] = { points = points, mouse = f:IsMouseEnabled(), alpha = f:GetAlpha(), scale = f:GetScale() }
+    saved[f] = { points = points, mouse = f:IsMouseEnabled(), alpha = f:GetAlpha(), scale = f:GetScale(),
+        level = f:GetFrameLevel() }
 end
 
 local function Restore(f)
     local s = saved[f]
     if not s then return end
     f:SetScale(s.scale or 1)
+    f:SetFrameLevel(s.level)
     f:ClearAllPoints()
     for _, p in ipairs(s.points) do f:SetPoint(unpack(p)) end
     f:SetAlpha(s.alpha or 1)
@@ -159,8 +161,8 @@ local function PaintPlate(e, f, flat)
         anchor = box
     end
     local s = ns.P.elements[e.key]
-    w, h = w + 2 * s.pad, h + 2 * s.pad
-    local mask = Flaty.GetShape(Flaty.Rounded(ns.P.corners)).mask
+    w, h = math.max(2, w + 2 * s.pad), math.max(2, h + 2 * s.pad)
+    local mask = Flaty.GetShape(Flaty.Rounded(ns.PlateCorners(s))).mask
     local bg = s.bgColor
     p.bg:SetTexture(mask)
     p.bg:SetVertexColor(bg.r, bg.g, bg.b, bg.a or 1)
@@ -224,6 +226,8 @@ local function ApplyOne(e)
     if On() then
         local s = ns.P.elements[e.key]
         f:SetScale((saved[f].scale or 1) * (s.size or 100) / 100)
+        -- above the map (some sit lower, e.g. the addon menu)
+        f:SetFrameLevel(math.max(saved[f].level, Minimap:GetFrameLevel() + 5))
         Place(e, f)
         Paint(e, f)
         Decor(e, f, s.look ~= "flat")

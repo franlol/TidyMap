@@ -65,6 +65,12 @@ function ns.BorderColor()
     return b.class and ClassColor() or { b.color.r, b.color.g, b.color.b, b.color.a or 1 }
 end
 
+-- The corners of a flat plate: the map's, or its own (0-100 %)
+function ns.PlateCorners(s)
+    if s.mapCorners ~= false then return ns.P.corners end
+    return s.corners or 0
+end
+
 -- The border color of a flat plate (icon or header piece): none when its
 -- border is 0; the map's (none if the map has no border) or its own
 function ns.PlateEdgeColor(s)

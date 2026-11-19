@@ -23,14 +23,17 @@ ns.ACCENT = { 0.96, 0.72, 0.32 }
 -- border (0 = none; the map's border color or its own) and its color
 local function Plate(t)
     t.pad = t.pad or 2
+    t.mapCorners = t.mapCorners ~= false   -- the map's corners, or its own
+    t.corners = t.corners or 0
     t.edge = t.edge or 1
     t.mapColor = t.mapColor ~= false
     t.edgeColor = t.edgeColor or C(0, 0, 0, 1)
     t.bgColor = t.bgColor or C(0.05, 0.05, 0.06, 0.9)
     return t
 end
-local function Icon(angle, dist)
-    return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100 })
+local function Icon(angle, dist, round)
+    return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100,
+        mapCorners = not round, corners = round and 100 or 0 })
 end
 local function Piece(t)
     t.offset = t.offset or 0
@@ -62,7 +65,7 @@ ns.defaults = {
         tracking = Icon(138, 0),
         mail = Icon(162, 0),
         compartment = Icon(20, 0),
-        daynight = Icon(64, 0),
+        daynight = Icon(64, 0, true),   -- a round picture: a round plate
         coords = Icon(270, -14),
     },
     -- the texts on and around the map: one font, a size each

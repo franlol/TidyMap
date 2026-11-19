@@ -30,7 +30,7 @@ local function Layer(f, sub)
 end
 
 -- one layer of w x h, centered on the frame
-local function PaintLayer(L, f, kind, w, h, color)
+local function PaintLayer(L, f, kind, w, h, color, corners)
     if not color or kind == "none" then
         L.l:Hide() L.c:Hide() L.r:Hide()
         return
@@ -50,7 +50,7 @@ local function PaintLayer(L, f, kind, w, h, color)
         L.r:SetSize(cap, h) L.r:ClearAllPoints() L.r:SetPoint("LEFT", L.c, "RIGHT")
         L.l:Show() L.c:Show() L.r:Show()
     else
-        L.c:SetTexture(Flaty.GetShape(Flaty.Rounded(ns.P.corners)).mask)
+        L.c:SetTexture(Flaty.GetShape(Flaty.Rounded(corners or ns.P.corners)).mask)
         L.c:SetTexCoord(0, 1, 0, 1)
         L.c:SetSize(w, h)
         L.c:SetPoint("CENTER", f, "CENTER")
@@ -144,14 +144,15 @@ local function Paint(f)
     local t = ns.P.texts
     Flaty.SetFontFile(f.text, t.font, t[f.key], t.outline)
     local c = Cfg(f)
-    local w = (f.text:GetStringWidth() or 0) + 2 * (PAD_X + c.pad)
-    local h = (f.text:GetStringHeight() or 10) + 2 * (PAD_Y + c.pad)
+    local w = math.max(2, (f.text:GetStringWidth() or 0) + 2 * (PAD_X + c.pad))
+    local h = math.max(2, (f.text:GetStringHeight() or 10) + 2 * (PAD_Y + c.pad))
     f:SetSize(w, h)
     -- no text (coordinates in an instance): no background either
     local kind = (f.text:GetText() or "") ~= "" and c.bg or "none"
     local bg = { c.bgColor.r, c.bgColor.g, c.bgColor.b, c.bgColor.a or 1 }
-    PaintLayer(f.plate, f, kind, w, h, bg)
-    PaintLayer(f.edge, f, kind, w + 2 * c.edge, h + 2 * c.edge, ns.PlateEdgeColor(c))
+    local corners = ns.PlateCorners(c)
+    PaintLayer(f.plate, f, kind, w, h, bg, corners)
+    PaintLayer(f.edge, f, kind, w + 2 * c.edge, h + 2 * c.edge, ns.PlateEdgeColor(c), corners)
 
     local mode = Mode(f)
     if ns.IsEditing() then
