@@ -1,32 +1,22 @@
 # TidyMap
 
-A clean, shaped minimap for WoW Forever, built with
-[LibFlatyUI-1.0](https://github.com/franlol/LibFlatyUI-1.0).
+A clean, shaped minimap for WoW Forever.
 
-- **Styles in one click:** Clean, Classic, Glow, Minimal. Then fine-tune.
-- **Corners** from square to round, in 1% steps.
-- **Blizzard's icons on the edge** (zone, clock, coordinates, calendar, tracking, mail,
-  addon menu, day / night): shown, on hover or hidden, at any angle. Unlock them to
-  drag them along the edge, or click one to open its settings.
-- **Clean mode:** icons only while the mouse is over the map.
-- **Icon look:** flat (dark plate in the map's corner shape) or Blizzard's, any size.
-- **Visibility:** always, only out of combat or only in combat, with fade and opacity.
-- **Texts:** font, size, outline, shadow and color for the zone, clock and coordinates
-  (Blizzard's own texts; the zone can keep its PvP colors).
-- **Addon buttons** (LibDBIcon): flat look, and any of them can move into the
-  addon menu on the map instead.
-- **Flat border** in any color (or your class color), and an optional **glow**.
-- **Zoom:** back out by itself after a few seconds, or remember your level (the mouse
-  wheel zooms).
-- Changes show at once on the real minimap.
-- Profiles, English and Spanish.
+<p>
+  <img src="screenshots/clean.png" width="49%" alt="Clean mode: only the map">
+  <img src="screenshots/icons.png" width="49%" alt="Icons on the map's edge">
+</p>
 
-Move and resize the minimap with the game's **Edit Mode**: TidyMap only changes
-how it looks. Clicking the map still pings, as always.
+- Square, round or anything between, with a flat border and glow
+- Blizzard's icons placed on the edge, shown, on hover or hidden
+- Clean mode: icons only with the mouse over the map
+- Move and resize the map anywhere
+- Tidy addon buttons: flat, sized, or into the addon menu
+- Profiles, English and Spanish
 
-Open the options with `/tidymap` or with the TidyMap icon on the minimap. The icon
-is a LibDBIcon button like other addons': it can move into the addon menu
-(Addons page) or be hidden.
+![Options](screenshots/options.png)
+
+Open with `/tidymap` or the minimap icon.
 
 ## License
 
