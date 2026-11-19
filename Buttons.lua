@@ -26,9 +26,17 @@ local function Locked()
 end
 
 local function ApplyButton(dbi, name)
-    if not dbi:GetMinimapButton(name) then return end
+    local b = dbi:GetMinimapButton(name)
+    if not b then return end
     local on = On()
     local P = ns.P.buttons
+
+    -- LibDBIcon places a button once, on the shape GetMinimapShape gives
+    -- then (before the profile loads: round). Placed again at its saved
+    -- position on the map's shape now.
+    if dbi.SetButtonToPosition then
+        dbi:SetButtonToPosition(name, b.db and b.db.minimapPos or b.minimapPos)
+    end
 
     if on and P.menu[name] and dbi.AddButtonToCompartment then
         dbi:AddButtonToCompartment(name)
@@ -56,7 +64,7 @@ local function ApplyButton(dbi, name)
     -- Lock icons: TidyMap locks only the ones not locked already (by their
     -- addon), and unlocks only the ones it locked
     if dbi.Lock then
-        local b, mine = dbi:GetMinimapButton(name), Locked()
+        local mine = Locked()
         if on and ns.P.locked then
             if not mine[name] and not (b.db and b.db.lock) then
                 dbi:Lock(name)
