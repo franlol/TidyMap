@@ -159,6 +159,9 @@ local function BuildIcons(container)
     local title = card
     -- zone and clock belong to TidyMap's header while it is on
     local free = Both(On, function() return not ns.InHeader(ns.selected) end)
+    -- zone, clock and coordinates: set on the Header page while it is on
+    -- (the line is always there, empty otherwise: no layout jumps)
+    local inHeader = card:Add(UI.Note(card, " "))
     card:Add(UI.Segmented(card, L["Show"], MODES(), function() return Sel().mode end, function(v)
         Sel().mode = v
         ApplySel()
@@ -214,6 +217,8 @@ local function BuildIcons(container)
     UI.OnRefresh = function()
         if paint then paint() end
         title.title:SetText(ElementName(ns.selected))
+        inHeader.text:SetText(ns.InHeader(ns.selected)
+            and L["Part of TidyMap's header: set it on the Header page."] or " ")
     end
 
     left:Layout()

@@ -60,6 +60,7 @@ ns.translations.esES = {
     ["PvP colors"] = "Colores JcJ",
     ["Text color"] = "Color del texto",
     ["In the header"] = "En la cabecera",
+    ["Part of TidyMap's header: set it on the Header page."] = "Parte de la cabecera de TidyMap: se ajusta en la página Cabecera.",
 
     -- Icons
     ["Icons"] = "Iconos",
