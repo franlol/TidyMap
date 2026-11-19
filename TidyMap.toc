@@ -25,5 +25,6 @@ Header.lua
 Buttons.lua
 Edit.lua
 Zoom.lua
+Visibility.lua
 Icon.lua
 Options.lua

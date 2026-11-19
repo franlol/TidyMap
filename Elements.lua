@@ -239,6 +239,7 @@ function ns.SetElementsEditing(on)
     editing = on and true or false
     Apply()
     if ns.ApplyHeader then ns.ApplyHeader() end
+    if ns.ApplyVisibility then ns.ApplyVisibility() end
 end
 
 -------------------------------------------------------------------------------

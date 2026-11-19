@@ -109,6 +109,15 @@ ns.translations.esES = {
     -- Map
     ["Zoom"] = "Zoom",
     ["Zoom buttons on hover"] = "Botones de zoom al pasar",
+    ["Visibility"] = "Visibilidad",
+    ["Show the map"] = "Mostrar el mapa",
+    ["Always"] = "Siempre",
+    ["Out of combat"] = "Fuera de combate",
+    ["In combat"] = "En combate",
+    ["Opacity"] = "Opacidad",
+    ["Faded opacity"] = "Opacidad atenuada",
+    ["Fade time"] = "Tiempo de fundido",
+    ["Show it with the mouse over"] = "Mostrarlo con el ratón encima",
     ["After you zoom in with the mouse wheel, the map zooms back out by itself."] =
         "Tras acercar el mapa con la rueda del ratón, vuelve a alejarse solo.",
     ["Zoom back out"] = "Volver a alejar",

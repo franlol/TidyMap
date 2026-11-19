@@ -352,6 +352,23 @@ local function BuildMap(container)
     g, s = Bind("zoom", "buttons")
     card:Add(UI.Check(card, L["Zoom buttons on hover"], g, s, { enableIf = On }))
 
+    -- the whole map by situation
+    card = page:Add(1, UI.Card(page.content, L["Visibility"]))
+    g, s = Bind("visibility", "when")
+    card:Add(UI.Segmented(card, L["Show the map"], {
+        { "always", L["Always"] }, { "outCombat", L["Out of combat"] }, { "inCombat", L["In combat"] },
+    }, g, s, { enableIf = On }))
+    g, s = Bind("visibility", "opacity")
+    card:Add(UI.Slider(card, L["Opacity"], 10, 100, 5, g, s, { format = Pct, enableIf = On }))
+    local situational = Both(On, function() return ns.P.visibility.when ~= "always" end)
+    g, s = Bind("visibility", "faded")
+    card:Add(UI.Slider(card, L["Faded opacity"], 0, 90, 5, g, s, { format = Pct, enableIf = situational }))
+    g, s = Bind("visibility", "fade")
+    card:Add(UI.Slider(card, L["Fade time"], 0, 2, 0.1, g, s,
+        { format = function(v) return ("%.1f s"):format(v) end, enableIf = situational }))
+    g, s = Bind("visibility", "mouse")
+    card:Add(UI.Check(card, L["Show it with the mouse over"], g, s, { enableIf = situational }))
+
     card = page:Add(2, UI.Card(page.content, "TidyMap"))
     card:Add(UI.Check(card, L["Minimap icon"], function() return not ns.db.icon.hide end, function(v)
         ns.db.icon.hide = not v
