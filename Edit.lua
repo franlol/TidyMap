@@ -78,7 +78,12 @@ function ns.OnElementPlaced(key, f)
     o:Show()
 end
 
--- The options window opens or closes
+-- Lock icons off: the outlines stay (window open or not) until locked again
+local function ApplyLock()
+    ns.SetEditing(ns.P.enabled and not ns.P.locked)
+end
+ns.Module(function() end, ApplyLock)
+
 function ns.SetEditing(on)
     editing = on and true or false
     if not editing then

@@ -57,6 +57,7 @@ ns.defaults = {
     -- after a zoom in: "out" (back out after delay s), "remember" or "blizzard"
     zoom = { mode = "out", delay = 10, buttons = true },
     clean = false,      -- every shown icon only on hover
+    locked = true,      -- icons (Blizzard's and other addons') can't be dragged
     -- the whole minimap by situation: always, only out of combat or only in
     -- combat; its opacity when shown and when faded, fade time, and whether
     -- the mouse over it brings it back

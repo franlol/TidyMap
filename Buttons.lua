@@ -6,6 +6,7 @@
 --     menu on the map collects them)
 --   · flat look: RemoveButtonBorder / RemoveButtonBackground
 --   · Clean mode: ShowOnEnter (they show with the mouse over the map)
+--   · Lock icons: Lock / Unlock
 -- Whatever TidyMap changed is undone when it is turned off or unchecked.
 -------------------------------------------------------------------------------
 
@@ -16,6 +17,13 @@ local function DBI() return LibStub("LibDBIcon-1.0", true) end
 
 -- what TidyMap changed, per button name (to undo only that)
 local inMenu, flat, hover = {}, {}, {}
+
+-- the buttons TidyMap locked: kept across sessions (LibDBIcon saves the lock
+-- in that addon's settings, so it would look like the addon's own)
+local function Locked()
+    ns.db.lockedButtons = ns.db.lockedButtons or {}
+    return ns.db.lockedButtons
+end
 
 local function ApplyButton(dbi, name)
     if not dbi:GetMinimapButton(name) then return end
@@ -42,6 +50,21 @@ local function ApplyButton(dbi, name)
             dbi:ResetButtonBorder(name)
             dbi:ResetButtonBackground(name)
             flat[name] = nil
+        end
+    end
+
+    -- Lock icons: TidyMap locks only the ones not locked already (by their
+    -- addon), and unlocks only the ones it locked
+    if dbi.Lock then
+        local b, mine = dbi:GetMinimapButton(name), Locked()
+        if on and ns.P.locked then
+            if not mine[name] and not (b.db and b.db.lock) then
+                dbi:Lock(name)
+                mine[name] = true
+            end
+        elseif mine[name] then
+            dbi:Unlock(name)
+            mine[name] = nil
         end
     end
 

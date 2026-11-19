@@ -11,6 +11,7 @@
 --   Addons   : other addons' minimap buttons: flat look, into the addon menu
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
+-- "Unlock icons" (header, = Icons > Lock icons): drag icons on the map.
 -- Every change shows at once on the real minimap. Options that do not
 -- apply are greyed out, never hidden.
 -------------------------------------------------------------------------------
@@ -195,6 +196,11 @@ local function BuildIcons(container)
     }, { enableIf = On }))
 
     card = right:Add(1, UI.Card(right.content, L["All icons"]))
+    -- Blizzard's icons and other addons' buttons alike
+    card:Add(UI.Check(card, L["Lock icons"], function() return ns.P.locked end, function(v)
+        ns.P.locked = v
+        ns.ApplyAll()
+    end, { enableIf = On, tip = L["Unlocked: drag any icon along the edge of the map, other addons' buttons too. Their clicks wait until locked again."] }))
     card:Add(UI.Buttons(card, {
         { L["Reset all icons"], function()
             for key, d in pairs(ns.defaults.elements) do
@@ -488,11 +494,12 @@ local function Build()
     end
     -- "Move icons" (window header): outlines on the map's icons, to drag
     -- them along the edge or click them; off again when the window closes
-    win:AddHeaderButton(L["Move icons"], function()
-        ns.SetEditing(not ns.IsEditing())
+    -- the same as Icons > Lock icons, at hand on every page
+    win:AddHeaderButton(L["Unlock icons"], function()
+        ns.P.locked = not ns.P.locked
+        ns.ApplyAll()
         UI.RefreshAll()
-    end, function() return ns.IsEditing() end, L["Drag them along the edge of the map, or click one for its settings."])
-    win:HookScript("OnHide", function() ns.SetEditing(false) end)
+    end, function() return not ns.P.locked end, L["Drag them along the edge of the map, or click one for its settings."])
     win:Select("look")
 end
 
