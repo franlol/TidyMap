@@ -187,7 +187,7 @@ local function BuildIcons(container)
             end
             ApplySel()
             UI.RefreshAll()
-        end },
+        end, "danger", confirm = true },
     }, { enableIf = On }))
 
     card = right:Add(1, UI.Card(right.content, L["All icons"]))
