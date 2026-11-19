@@ -32,7 +32,9 @@ ns.ELEMENTS = {
         text = function() return MinimapZoneText end,
         -- Blizzard's text sits left-aligned at the button's left side
         center = true,
-        decor = function(f) return { f.StateTexture } end },
+        -- the bar behind the text (a nine-slice frame drawn over the
+        -- button's own textures, so over the flat plate too)
+        decor = function(f) return { f.StateTexture, f.BorderTop } end },
     { key = "clock", name = "Clock",
         frame = function() return TimeManagerClockButton end,
         text = function() return TimeManagerClockTicker end },
