@@ -299,8 +299,18 @@ function ns.ApplyElement(key)
     if e then ApplyOne(e) end
 end
 
+-- TidyMap's own frames that fade with the "on hover" icons (its minimap
+-- icon): { frame, hover = function() return true while it fades end }
+ns.faders = {}
+local function FadeOwn()
+    for _, x in ipairs(ns.faders) do
+        x.frame:SetAlpha((x.hover() and not editing) and alpha or 1)
+    end
+end
+
 local function Apply()
     for _, e in ipairs(ns.ELEMENTS) do ApplyOne(e) end
+    FadeOwn()
 end
 ns.ApplyElements = Apply
 
@@ -324,6 +334,9 @@ local function MouseNear()
         local f = e.frame()
         if f and f:IsVisible() and f:IsMouseOver() then return true end
     end
+    for _, x in ipairs(ns.faders) do
+        if x.frame:IsVisible() and x.frame:IsMouseOver() then return true end
+    end
     return false
 end
 
@@ -342,6 +355,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         local f = e.frame()
         if f and ns.ElementMode(e.key) == "hover" then f:SetAlpha(alpha) end
     end
+    FadeOwn()
 end)
 
 -------------------------------------------------------------------------------

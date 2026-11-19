@@ -54,6 +54,9 @@ btn:SetScript("OnLeave", function()
     GameTooltip:Hide()
 end)
 
+-- Clean mode: only with the mouse over the map, like the other icons
+ns.faders[#ns.faders + 1] = { frame = btn, hover = function() return ns.P.enabled and ns.P.clean end }
+
 local function Apply()
     -- TidyMap off: the map is Blizzard's alone (the options still open
     -- with /tidymap and from the addon menu)
