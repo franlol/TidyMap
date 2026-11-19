@@ -127,6 +127,9 @@ local function Decor(e, f, shown)
 end
 
 local function PaintPlate(e, f, flat)
+    -- some icons draw on a part of their frame (mail: the envelope)
+    f = e.plateOn and e.plateOn(f) or f
+    if not f then return end
     local p = plates[f]
     if not flat then
         if p then p.bg:Hide() p.edge:Hide() end
