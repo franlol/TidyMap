@@ -45,6 +45,7 @@ ns.translations.esES = {
     ["Decimals"] = "Decimales",
     ["Black border"] = "Borde negro",
     ["Background"] = "Fondo",
+    ["Position"] = "Posición",
     ["Background color"] = "Color del fondo",
     ["PvP colors"] = "Colores JcJ",
     ["Text color"] = "Color del texto",

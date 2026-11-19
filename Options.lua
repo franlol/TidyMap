@@ -266,9 +266,20 @@ local function TextCard(page, col, key, title)
             { alpha = true, enableIf = shown }))
     end
 
+    -- where it sits on the edge (the same settings as on the Icons page)
+    local function E() return ns.P.elements[key] end
+    card:Add(UI.Heading(card, L["Position"]))
+    card:Add(UI.Slider(card, L["Angle"], 0, 359, 1, function() return E().angle end, function(v)
+        E().angle = v
+        ns.ApplyElement(key)
+    end, { format = function(v) return ("%d°"):format(v) end, enableIf = shown }))
+    card:Add(UI.Slider(card, L["Distance"], -20, 40, 1, function() return E().dist end, function(v)
+        E().dist = v
+        ns.ApplyElement(key)
+    end, { format = UI.px, enableIf = shown }))
+
     -- its background: the icon's flat plate (the same settings as on the
     -- Icons page), or Blizzard's own art
-    local function E() return ns.P.elements[key] end
     card:Add(UI.Heading(card, L["Background"]))
     card:Add(UI.Segmented(card, L["Look"], { { "flat", L["Flat"] }, { "blizzard", "Blizzard" } },
         function() return E().look end, function(v)
