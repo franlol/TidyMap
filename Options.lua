@@ -90,7 +90,7 @@ end
 -- one on the right. With the window open they can also be dragged on the
 -- map, or clicked to pick them here.
 -------------------------------------------------------------------------------
-ns.selected = ns.selected or "zone"
+ns.selected = ns.selected or "calendar"
 
 local MODES = function()
     return { { "show", L["Show"] }, { "hover", L["On hover"] }, { "hide", L["Hide"] } }
@@ -143,25 +143,18 @@ local function BuildIcons(container)
 
     card = left:Add(1, UI.Card(left.content, L["Icons"]))
     card:Add(UI.List(card, {
-        items = function() return ns.ELEMENTS end,
+        items = ns.IconList,
         label = function(e) return L[e.name] end,
-        tag = function(e)
-            if ns.InHeader(e.key) then return L["In the header"], UI.theme.muted end
-            return MODE_TAG[ns.ElementMode(e.key)]()
-        end,
+        tag = function(e) return MODE_TAG[ns.ElementMode(e.key)]() end,
         selected = function(e) return e.key == ns.selected end,
         onSelect = function(_, e) ns.selected = e.key UI.RefreshAll() end,
-        rows = #ns.ELEMENTS,
+        rows = #ns.IconList(),
         enableIf = On,
     }))
 
     card = right:Add(1, UI.Card(right.content, ElementName(ns.selected)))
     local title = card
-    -- zone and clock belong to TidyMap's header while it is on
-    local free = Both(On, function() return not ns.InHeader(ns.selected) end)
-    -- zone, clock and coordinates: set on the Header page while it is on
-    -- (the line is always there, empty otherwise: no layout jumps)
-    local inHeader = card:Add(UI.Note(card, " "))
+    local free = On
     card:Add(UI.Segmented(card, L["Show"], MODES(), function() return Sel().mode end, function(v)
         Sel().mode = v
         ApplySel()
@@ -217,8 +210,6 @@ local function BuildIcons(container)
     UI.OnRefresh = function()
         if paint then paint() end
         title.title:SetText(ElementName(ns.selected))
-        inHeader.text:SetText(ns.InHeader(ns.selected)
-            and L["Part of TidyMap's header: set it on the Header page."] or " ")
     end
 
     left:Layout()
@@ -228,7 +219,7 @@ end
 -------------------------------------------------------------------------------
 -- Header: TidyMap's own zone name and clock, the same options for both
 -------------------------------------------------------------------------------
-local function HeaderOn() return ns.P.enabled and ns.P.header.on end
+local function HeaderOn() return ns.P.enabled end
 
 local function PieceCard(page, col, key, title)
     local function C() return ns.P.header[key] end
@@ -264,16 +255,9 @@ end
 local function BuildHeader(container)
     local page = UI.Page(container, 2)
 
-    local card = page:Add(1, UI.Card(page.content, L["Header"],
-        L["TidyMap's own zone name, clock and coordinates. Off: Blizzard's, on the Icons page."]))
-    card:Add(UI.Switch(card, L["TidyMap header"], function() return ns.P.header.on end, function(v)
-        ns.P.header.on = v
-        ns.ApplyAll()
-    end, { enableIf = On }))
-
     PieceCard(page, 1, "zone", L["Zone"])
     PieceCard(page, 2, "clock", L["Clock"])
-    PieceCard(page, 2, "coords", L["Coordinates"])
+    PieceCard(page, 1, "coords", L["Coordinates"])
 
     page:Layout()
 end
@@ -310,13 +294,7 @@ local function BuildTexts(container)
     card:Add(SizeSlider(card, "clock"))
 
     card = page:Add(2, UI.Card(page.content, L["Coordinates"]))
-    -- Blizzard's own coordinates (TidyMap's header has its own)
-    card:Add(UI.Check(card, L["Blizzard's coordinates"], function() return C_CVar.GetCVarBool("minimapShowPlayerCoords") end,
-        function(v) C_CVar.SetCVar("minimapShowPlayerCoords", v and "1" or "0") end,
-        { enableIf = function() return not ns.P.header.on end }))
-    card:Add(SizeSlider(card, "coords", { enableIf = Both(On, function()
-        return ns.P.header.on or C_CVar.GetCVarBool("minimapShowPlayerCoords")
-    end) }))
+    card:Add(SizeSlider(card, "coords"))
 
     page:Layout()
 end

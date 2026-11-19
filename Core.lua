@@ -74,12 +74,11 @@ ns.defaults = {
         outline = "",
         zone = 12, clock = 12, coords = 10,
     },
-    -- TidyMap's header: its own zone name, clock and coordinates (on:
-    -- Blizzard's zone, clock and coordinates stay hidden). Each piece: shown / on hover / hidden, top or
+    -- TidyMap's header: its own zone name, clock and coordinates (while
+    -- TidyMap is on, Blizzard's stay hidden). Each piece: shown / on hover / hidden, top or
     -- bottom, outside or inside the map, extra distance, background (none,
     -- flat, pill) and its color, text color (zone: Blizzard's PvP colors)
     header = {
-        on = true,
         zone = Piece({ mode = "show", place = "top", side = "outside", bg = "pill",
             pvp = true, color = C(1, 0.82, 0, 1) }),
         clock = Piece({ mode = "show", place = "bottom", side = "outside", bg = "pill",
@@ -183,6 +182,8 @@ end
 -- Older settings in the current form
 local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
 local function Migrate(p)
+    -- the header has no switch of its own any more
+    if type(p.header) == "table" then p.header.on = nil end
     -- the zoom on / off became a choice
     if type(p.zoom) == "table" and p.zoom.auto ~= nil then
         p.zoom.mode = p.zoom.mode or (p.zoom.auto and "out" or "blizzard")

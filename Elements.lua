@@ -77,9 +77,21 @@ function ns.EffectiveMode(m)
     return m
 end
 
--- Blizzard's zone, clock and coordinates give way to TidyMap's header
-function ns.InHeader(key)
-    return (key == "zone" or key == "clock" or key == "coords") and ns.P.header.on
+-- Blizzard's zone, clock and coordinates: TidyMap's header replaces them
+-- while TidyMap is on (they only come back with Blizzard's look)
+local HEADER = { zone = true, clock = true, coords = true }
+function ns.InHeader(key) return HEADER[key] or false end
+
+-- The icons the Icons page lists (not the header's)
+local icons
+function ns.IconList()
+    if not icons then
+        icons = {}
+        for _, e in ipairs(ns.ELEMENTS) do
+            if not HEADER[e.key] then icons[#icons + 1] = e end
+        end
+    end
+    return icons
 end
 
 function ns.ElementMode(key)
@@ -206,6 +218,12 @@ local function Place(e, f)
 end
 
 local function Paint(e, f)
+    -- replaced by TidyMap's header: gone, even while moving icons
+    if ns.InHeader(e.key) then
+        f:SetAlpha(0)
+        SetMouse(e, f, false)
+        return
+    end
     local mode = ns.ElementMode(e.key)
     if editing then
         f:SetAlpha(mode == "hide" and 0.35 or 1)

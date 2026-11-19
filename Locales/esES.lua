@@ -43,11 +43,7 @@ ns.translations.esES = {
 
     -- Header
     ["Header"] = "Cabecera",
-    ["TidyMap's own zone name, clock and coordinates. Off: Blizzard's, on the Icons page."] =
-        "Nombre de zona, reloj y coordenadas propios de TidyMap. Apagado: los de Blizzard, en la página Iconos.",
     ["Decimals"] = "Decimales",
-    ["Blizzard's coordinates"] = "Coordenadas de Blizzard",
-    ["TidyMap header"] = "Cabecera de TidyMap",
     ["Place"] = "Lugar",
     ["Top"] = "Arriba",
     ["Bottom"] = "Abajo",
@@ -59,8 +55,6 @@ ns.translations.esES = {
     ["Background color"] = "Color del fondo",
     ["PvP colors"] = "Colores JcJ",
     ["Text color"] = "Color del texto",
-    ["In the header"] = "En la cabecera",
-    ["Part of TidyMap's header: set it on the Header page."] = "Parte de la cabecera de TidyMap: se ajusta en la página Cabecera.",
 
     -- Icons
     ["Icons"] = "Iconos",

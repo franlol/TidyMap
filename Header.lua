@@ -15,7 +15,7 @@ local FLAT = "Interface\\Buttons\\WHITE8X8"
 local GAP = 3     -- between the map and a piece, and between two pieces
 local PAD_X, PAD_Y = 8, 3
 
-local function On() return ns.P and ns.P.enabled and ns.P.header.on end
+local function On() return ns.P and ns.P.enabled end
 
 -------------------------------------------------------------------------------
 -- Background: none, flat (the map's corner shape) or pill (round ends).

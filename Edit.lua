@@ -65,7 +65,7 @@ end
 -- Elements.lua calls this after placing an icon
 function ns.OnElementPlaced(key, f)
     local o = overlays[key]
-    if not editing or not ns.P.enabled then
+    if not editing or not ns.P.enabled or ns.InHeader(key) then
         if o then o:Hide() end
         return
     end
