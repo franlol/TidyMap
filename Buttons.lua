@@ -111,6 +111,7 @@ local function Listen()
     listening = true
     dbi.RegisterCallback(ns, "LibDBIcon_IconCreated", function(_, _, name)
         ApplyButton(dbi, name)
+        ns.RefreshAddonOutlines()
     end)
 end
 

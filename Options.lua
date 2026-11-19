@@ -520,3 +520,10 @@ function ns.SelectElement(key)
     win:Select("icons")
     UI.RefreshAll()
 end
+
+-- A header piece clicked or dragged on the map: one page of the window
+function ns.OpenPage(key)
+    if not win then Build() end
+    if not win:IsShown() then win:Show() end
+    win:Select(key)
+end

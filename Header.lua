@@ -78,6 +78,10 @@ end
 local zone, clock, coords = NewPiece("zone"), NewPiece("clock"), NewPiece("coords")
 local pieces = { zone, clock, coords }   -- also the order they stack in
 
+-- Edit.lua outlines them while the icons are unlocked
+local byKey = { zone = zone, clock = clock, coords = coords }
+function ns.HeaderPieces() return byKey end
+
 -- zone and coordinates: not clickable, so clicks reach the map (pings)
 zone:EnableMouse(false)
 coords:EnableMouse(false)
