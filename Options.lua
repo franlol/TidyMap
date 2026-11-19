@@ -7,7 +7,7 @@
 --   Icons    : Blizzard's icons around the map: clean mode, shown / on
 --              hover / hidden, place on the edge (also by dragging them
 --              on the map while this window is open)
---   Texts    : font and outline, sizes of zone, clock and coordinates
+--   Texts    : each text's font, size, outline, shadow and color
 --   Addons   : other addons' minimap buttons: flat look, into the addon menu
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
@@ -238,14 +238,6 @@ local function PieceCard(page, col, key, title)
     card:Add(UI.Segmented(card, L["Background"], { { "none", L["None"] }, { "flat", L["Flat"] }, { "pill", L["Pill"] } },
         Get("bg"), Set("bg"), { enableIf = shown }))
     PlateRows(card, C, Both(shown, function() return C().bg ~= "none" end), function() return C().bg == "flat" end)
-    if key == "zone" then
-        card:Add(UI.Check(card, L["PvP colors"], Get("pvp"), Set("pvp"), { enableIf = shown }))
-        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
-            { alpha = true, sub = true, enableIf = Both(shown, function() return not C().pvp end) }))
-    else
-        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
-            { alpha = true, enableIf = shown }))
-    end
     if key == "coords" then
         card:Add(UI.Segmented(card, L["Decimals"], { { 0, "0" }, { 1, "1" }, { 2, "2" } },
             Get("decimals"), Set("decimals"), { enableIf = shown }))
@@ -263,39 +255,65 @@ local function BuildHeader(container)
 end
 
 -------------------------------------------------------------------------------
--- Texts: one font for all, a size each
+-- Texts: every text of the map with its whole look: font, size, outline,
+-- shadow (color, offset) and color. Where and on what background they sit
+-- is on the Header page.
 -------------------------------------------------------------------------------
 local OUTLINES = function()
     return { { "", L["None"] }, { "OUTLINE", L["Thin"] }, { "THICKOUTLINE", L["Thick"] } }
 end
+local STYLE_KEYS = { "font", "outline", "shadow", "shadowX", "shadowY" }
 
-local function SizeSlider(card, key, opts)
-    local g, s = Bind("texts", key)
-    opts = opts or {}
-    opts.format = UI.px
-    opts.enableIf = opts.enableIf or On
-    return UI.Slider(card, L["Size"], 8, 24, 1, g, s, opts)
+local function TextCard(page, col, key, title)
+    local function C() return ns.P.texts[key] end
+    local function Get(k) return function() return C()[k] end end
+    local function Set(k) return function(v) C()[k] = v ns.ApplyAll() end end
+    -- greyed while its piece is hidden (Header page)
+    local shown = Both(On, function() return ns.P.header[key].mode ~= "hide" end)
+
+    local card = page:Add(col, UI.Card(page.content, title))
+    card:Add(UI.Dropdown(card, L["Font"], function() return UI.MediaList("font") end,
+        function() return UI.ResolveMedia(C().font) or C().font end, Set("font"), { enableIf = shown }))
+    card:Add(UI.Slider(card, L["Size"], 6, 32, 1, Get("size"), Set("size"), { format = UI.px, enableIf = shown }))
+    card:Add(UI.Segmented(card, L["Outline"], OUTLINES(), Get("outline"), Set("outline"), { enableIf = shown }))
+    card:Add(UI.Check(card, L["Shadow"], Get("shadow"), Set("shadow"), { enableIf = shown }))
+    local shadow = Both(shown, function() return C().shadow end)
+    card:Add(UI.Swatch(card, L["Shadow color"], function() return C().shadowColor end, Apply,
+        { alpha = true, sub = true, enableIf = shadow }))
+    card:Add(UI.Slider(card, L["Shadow X"], -4, 4, 1, Get("shadowX"), Set("shadowX"),
+        { format = UI.px, sub = true, enableIf = shadow }))
+    card:Add(UI.Slider(card, L["Shadow Y"], -4, 4, 1, Get("shadowY"), Set("shadowY"),
+        { format = UI.px, sub = true, enableIf = shadow }))
+    if key == "zone" then
+        card:Add(UI.Check(card, L["PvP colors"], Get("pvp"), Set("pvp"), { enableIf = shown }))
+        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
+            { alpha = true, sub = true, enableIf = Both(shown, function() return not C().pvp end) }))
+    else
+        card:Add(UI.Swatch(card, L["Text color"], function() return C().color end, Apply,
+            { alpha = true, enableIf = shown }))
+    end
+    -- font, outline and shadow to the other texts (they keep size and color)
+    card:Add(UI.Buttons(card, {
+        { L["Use this style for all texts"], function()
+            for _, other in ipairs({ "zone", "clock", "coords" }) do
+                local t = ns.P.texts[other]
+                if other ~= key then
+                    for _, k in ipairs(STYLE_KEYS) do t[k] = C()[k] end
+                    local sc = C().shadowColor
+                    t.shadowColor = { r = sc.r, g = sc.g, b = sc.b, a = sc.a }
+                end
+            end
+            ns.ApplyAll()
+            UI.RefreshAll()
+        end, "danger", confirm = true },
+    }, { enableIf = On }))
 end
 
 local function BuildTexts(container)
     local page = UI.Page(container, 2)
-
-    local card = page:Add(1, UI.Card(page.content, L["Font"], L["For every text of the map."]))
-    card:Add(UI.Dropdown(card, L["Font"], function() return UI.MediaList("font") end,
-        function() return UI.ResolveMedia(ns.P.texts.font) or ns.P.texts.font end,
-        function(v) ns.P.texts.font = v ns.ApplyAll() end, { enableIf = On }))
-    local g, s = Bind("texts", "outline")
-    card:Add(UI.Segmented(card, L["Outline"], OUTLINES(), g, s, { enableIf = On }))
-
-    card = page:Add(2, UI.Card(page.content, L["Zone"]))
-    card:Add(SizeSlider(card, "zone"))
-
-    card = page:Add(2, UI.Card(page.content, L["Clock"]))
-    card:Add(SizeSlider(card, "clock"))
-
-    card = page:Add(2, UI.Card(page.content, L["Coordinates"]))
-    card:Add(SizeSlider(card, "coords"))
-
+    TextCard(page, 1, "zone", L["Zone"])
+    TextCard(page, 2, "clock", L["Clock"])
+    TextCard(page, 1, "coords", L["Coordinates"])
     page:Layout()
 end
 

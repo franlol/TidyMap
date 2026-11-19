@@ -34,6 +34,15 @@ end
 local function Icon(angle, dist)
     return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100 })
 end
+local function Text(size, t)
+    t.font = LibStub("LibFlatyUI-1.0").Media("font", "Flaty: Inter")
+    t.size = size
+    t.outline = ""
+    t.shadow = true
+    t.shadowColor = C(0, 0, 0, 1)
+    t.shadowX, t.shadowY = 1, -1
+    return t
+end
 local function Piece(t)
     t.offset = t.offset or 0
     t.pad = 0
@@ -68,22 +77,21 @@ ns.defaults = {
         coords = Icon(270, -14),
     },
     -- the texts on and around the map: one font, a size each
+    -- each text of the map: font, size, outline, shadow (its color and
+    -- offset) and color (the zone can use Blizzard's PvP colors instead)
     texts = {
-        font = LibStub("LibFlatyUI-1.0").Media("font", "Flaty: Inter"),
-        outline = "",
-        zone = 12, clock = 12, coords = 10,
+        zone = Text(12, { pvp = true, color = C(1, 0.82, 0, 1) }),
+        clock = Text(12, { color = C(1, 1, 1, 1) }),
+        coords = Text(10, { color = C(1, 1, 1, 1) }),
     },
     -- TidyMap's header: its own zone name, clock and coordinates (while
     -- TidyMap is on, Blizzard's stay hidden). Each piece: shown / on hover / hidden, top or
     -- bottom, outside or inside the map, extra distance, background (none,
     -- flat, pill) and its color, text color (zone: Blizzard's PvP colors)
     header = {
-        zone = Piece({ mode = "show", place = "top", side = "outside", bg = "pill",
-            pvp = true, color = C(1, 0.82, 0, 1) }),
-        clock = Piece({ mode = "show", place = "bottom", side = "outside", bg = "pill",
-            color = C(1, 1, 1, 1) }),
-        coords = Piece({ mode = "hover", place = "bottom", side = "inside", bg = "none",
-            color = C(1, 1, 1, 1), decimals = 1 }),
+        zone = Piece({ mode = "show", place = "top", side = "outside", bg = "pill" }),
+        clock = Piece({ mode = "show", place = "bottom", side = "outside", bg = "pill" }),
+        coords = Piece({ mode = "hover", place = "bottom", side = "inside", bg = "none", decimals = 1 }),
     },
     -- other addons' minimap buttons (LibDBIcon): flat look, and the ones
     -- moved into the addon menu ([name] = true)
@@ -183,6 +191,19 @@ local OLD_SHAPES = { square = 0, slightly = 8, rounded = 20, round = 100 }
 local function Migrate(p)
     -- the header has no switch of its own any more
     if type(p.header) == "table" then p.header.on = nil end
+    -- one font / outline and a size per text became a full style per text
+    -- (the text colors moved here from the header pieces)
+    local t = p.texts
+    if type(t) == "table" and (t.font ~= nil or type(t.zone) == "number") then
+        local new = {}
+        for _, key in ipairs({ "zone", "clock", "coords" }) do
+            local h = type(p.header) == "table" and p.header[key] or {}
+            new[key] = { font = t.font, outline = t.outline, size = type(t[key]) == "number" and t[key] or nil,
+                color = h.color, pvp = h.pvp }
+            h.color, h.pvp = nil, nil
+        end
+        p.texts = new
+    end
     -- the zoom on / off became a choice
     if type(p.zoom) == "table" and p.zoom.auto ~= nil then
         p.zoom.mode = p.zoom.mode or (p.zoom.auto and "out" or "blizzard")

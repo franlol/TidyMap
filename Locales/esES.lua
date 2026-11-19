@@ -93,7 +93,11 @@ ns.translations.esES = {
     -- Texts
     ["Texts"] = "Textos",
     ["Font"] = "Fuente",
-    ["For every text of the map."] = "Para todos los textos del mapa.",
+    ["Shadow"] = "Sombra",
+    ["Shadow color"] = "Color de la sombra",
+    ["Shadow X"] = "Sombra X",
+    ["Shadow Y"] = "Sombra Y",
+    ["Use this style for all texts"] = "Usar este estilo en todos los textos",
     ["Outline"] = "Contorno",
     ["Thin"] = "Fino",
     ["Thick"] = "Grueso",

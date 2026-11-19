@@ -20,7 +20,6 @@ Locales\esES.lua
 Core.lua
 Map.lua
 Elements.lua
-Texts.lua
 Header.lua
 Buttons.lua
 Edit.lua

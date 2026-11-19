@@ -105,13 +105,19 @@ for _, f in ipairs(pieces) do
     ns.faders[#ns.faders + 1] = { frame = f, mode = function() return On() and Mode(f) or "hide" end }
 end
 
+-- The look of a piece's text (Texts page): its style, and its color
+local function Style(f) return ns.P.texts[f.key] end
+local function Color(f)
+    local c = Style(f).color
+    f.text:SetTextColor(c.r, c.g, c.b, c.a or 1)
+end
+
 local function UpdateZoneText()
     zone.text:SetText(MinimapZoneText and MinimapZoneText:GetText() or GetMinimapZoneText())
-    local c = Cfg(zone)
-    if c.pvp and MinimapZoneText then
+    if Style(zone).pvp and MinimapZoneText then
         zone.text:SetTextColor(MinimapZoneText:GetTextColor())
     else
-        zone.text:SetTextColor(c.color.r, c.color.g, c.color.b, c.color.a or 1)
+        Color(zone)
     end
 end
 
@@ -130,19 +136,25 @@ local function UpdateCoordsText()
         if x and y and (x > 0 or y > 0) then text = formats[d]:format(x * 100, y * 100) end
     end
     coords.text:SetText(text)
-    coords.text:SetTextColor(c.color.r, c.color.g, c.color.b, c.color.a or 1)
+    Color(coords)
 end
 
 local function UpdateClockText()
     if GameTime_GetTime then clock.text:SetText((GameTime_GetTime(true))) end
-    local c = Cfg(clock).color
-    clock.text:SetTextColor(c.r, c.g, c.b, c.a or 1)
+    Color(clock)
 end
 
 -- Size to the text, background, and the alpha / mouse of its mode
 local function Paint(f)
-    local t = ns.P.texts
-    Flaty.SetFontFile(f.text, t.font, t[f.key], t.outline)
+    local t = Style(f)
+    Flaty.SetFontFile(f.text, t.font, t.size, t.outline)
+    if t.shadow then
+        local s = t.shadowColor
+        f.text:SetShadowColor(s.r, s.g, s.b, s.a or 1)
+        f.text:SetShadowOffset(t.shadowX, t.shadowY)
+    else
+        f.text:SetShadowOffset(0, 0)
+    end
     local c = Cfg(f)
     local w = math.max(2, (f.text:GetStringWidth() or 0) + 2 * (PAD_X + c.pad))
     local h = math.max(2, (f.text:GetStringHeight() or 10) + 2 * (PAD_Y + c.pad))
