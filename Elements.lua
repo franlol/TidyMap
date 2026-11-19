@@ -30,6 +30,8 @@ ns.ELEMENTS = {
     { key = "zone", name = "Zone",
         frame = function() return MinimapCluster.ZoneTextButton end,
         text = function() return MinimapZoneText end,
+        -- Blizzard's text sits left-aligned at the button's left side
+        center = true,
         decor = function(f) return { f.StateTexture } end },
     { key = "clock", name = "Clock",
         frame = function() return TimeManagerClockButton end,
@@ -181,11 +183,26 @@ local function StyleText(e, f, on)
     if not fs then return end
     local b = fonts[fs]
     if not b then
+        local points = {}
+        for i = 1, fs:GetNumPoints() do points[i] = { fs:GetPoint(i) } end
         b = { font = { fs:GetFont() }, shadow = { fs:GetShadowColor() }, offset = { fs:GetShadowOffset() },
-            color = { fs:GetTextColor() } }
+            color = { fs:GetTextColor() }, points = points, justify = fs:GetJustifyH(), width = fs:GetWidth() }
         fonts[fs] = b
     end
     local t = on and ns.P.texts[e.key]
+    -- centered in its button (and so in its background), the button's width
+    if e.center then
+        fs:ClearAllPoints()
+        if t then
+            fs:SetPoint("CENTER", f, "CENTER")
+            fs:SetWidth(f:GetWidth() - 8)
+            fs:SetJustifyH("CENTER")
+        else
+            for _, p in ipairs(b.points) do fs:SetPoint(unpack(p)) end
+            fs:SetWidth(b.width)
+            fs:SetJustifyH(b.justify)
+        end
+    end
     if t then
         Flaty.SetFontFile(fs, t.font, t.size, t.outline)
         if t.shadow then
