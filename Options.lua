@@ -3,10 +3,12 @@
 --
 --   Look     : on / off, styles (one click), corners, border, glow
 --   Icons    : Blizzard's icons around the map (zone, clock and
---              coordinates too): clean mode, shown / on hover / hidden,
---              place on the edge (also by dragging them on the map)
---   Texts    : each text's font, size, outline, shadow and color
+--              coordinates too): place (also by dragging them on the map)
+--              and look
+--   Texts    : each text's font, size, outline, shadow, color and place
 --   Addons   : other addons' minimap buttons: flat look, into the addon menu
+--   Visibility: Clean mode, each part shown / on hover / hidden, the whole
+--              map by situation
 --   Map      : zoom, the minimap icon, language
 --   Profiles : profile in use, new, copy, reset, delete
 -- "Unlock icons" (header, = Icons > Lock icons): drag icons on the map.
@@ -155,14 +157,7 @@ local function ApplySel() ns.ApplyElement(ns.selected) end
 local function BuildIcons(container)
     local left, right = UI.Split(container, 210)
 
-    local card = left:Add(1, UI.Card(left.content, L["Clean mode"],
-        L["Shown icons only appear with the mouse over the map."]))
-    card:Add(UI.Switch(card, L["Clean mode"], function() return ns.P.clean end, function(v)
-        ns.P.clean = v
-        ns.ApplyAll()
-    end, { enableIf = On }))
-
-    card = left:Add(1, UI.Card(left.content, L["Icons"]))
+    local card = left:Add(1, UI.Card(left.content, L["Icons"]))
     card:Add(UI.List(card, {
         items = function() return ns.ELEMENTS end,
         label = function(e) return L[e.name] end,
@@ -175,16 +170,8 @@ local function BuildIcons(container)
 
     card = right:Add(1, UI.Card(right.content, ElementName(ns.selected)))
     local title = card
-    local free = On
-    -- the coordinates: shown or not is the game's own option
-    card:Add(UI.Segmented(card, L["Show"], MODES(), function() return ns.ElementMode(ns.selected) == "hide" and "hide" or Sel().mode end, function(v)
-        if ns.selected == "coords" then
-            C_CVar.SetCVar("minimapShowPlayerCoords", v == "hide" and "0" or "1")
-        end
-        Sel().mode = v
-        ApplySel()
-    end, { enableIf = free }))
-    local placed = Both(free, function() return ns.ElementMode(ns.selected) ~= "hide" end)
+    -- greyed while hidden (Visibility page)
+    local placed = Both(On, function() return ns.ElementMode(ns.selected) ~= "hide" end)
     card:Add(UI.Segmented(card, L["Decimals"], { { "0", "0" }, { "1", "1" } },
         function() return C_CVar.GetCVarBool("coordsByTenths") and "1" or "0" end,
         function(v) C_CVar.SetCVar("coordsByTenths", v) end,
@@ -408,12 +395,64 @@ local function BuildMap(container)
     card:Add(UI.Slider(card, L["After"], 3, 60, 1, g, s, { sub = true,
         format = function(v) return ("%d s"):format(v) end,
         enableIf = Both(On, function() return ns.P.zoom.mode == "out" end) }))
-    g, s = Bind("zoom", "buttons")
-    card:Add(UI.Check(card, L["Zoom buttons on hover"], g, s, { enableIf = On }))
+    card = page:Add(2, UI.Card(page.content, "TidyMap"))
+    card:Add(UI.Check(card, L["Minimap icon"], function() return not ns.db.icon.hide end, function(v)
+        ns.db.icon.hide = not v
+        ns.ApplyAll()
+    end))
+    card:Add(UI.Segmented(card, L["Language"], { { "enUS", "English" }, { "esES", "Español" } },
+        function() return ns.db.language or "enUS" end, function(v)
+            ns.SetLanguagePref(v)
+            Rebuild()
+        end))
+
+    page:Layout()
+end
+
+-------------------------------------------------------------------------------
+-- Visibility: what shows and when. The whole map by situation; Clean mode;
+-- each part shown, on hover or hidden.
+-------------------------------------------------------------------------------
+local function BuildVisibility(container)
+    local page = UI.Page(container, 2)
+
+    local card = page:Add(1, UI.Card(page.content, L["Clean mode"],
+        L["Shown icons only appear with the mouse over the map."]))
+    card:Add(UI.Switch(card, L["Clean mode"], function() return ns.P.clean end, function(v)
+        ns.P.clean = v
+        ns.ApplyAll()
+    end, { enableIf = On }))
+
+    -- each part: Blizzard's icons and texts, the zoom buttons, other addons'
+    -- buttons (LibDBIcon: shown or on hover only)
+    local parts = page:Add(2, UI.Card(page.content, L["Parts"]))
+    for _, e in ipairs(ns.ELEMENTS) do
+        local key = e.key
+        -- the coordinates: shown or not is the game's own option
+        parts:Add(UI.Segmented(parts, L[e.name], MODES(),
+            function() return ns.ElementMode(key) == "hide" and "hide" or ns.P.elements[key].mode end,
+            function(v)
+                if key == "coords" then
+                    C_CVar.SetCVar("minimapShowPlayerCoords", v == "hide" and "0" or "1")
+                end
+                ns.P.elements[key].mode = v
+                ns.ApplyElement(key)
+            end, { enableIf = On }))
+    end
+    parts:Add(UI.Segmented(parts, L["Zoom buttons"], { { "hover", L["On hover"] }, { "hide", L["Hide"] } },
+        function() return ns.P.zoom.buttons and "hover" or "hide" end, function(v)
+            ns.P.zoom.buttons = v == "hover"
+            ns.ApplyAll()
+        end, { enableIf = On }))
+    parts:Add(UI.Segmented(parts, L["Addon buttons"], { { "show", L["Show"] }, { "hover", L["On hover"] } },
+        function() return ns.P.buttons.hover and "hover" or "show" end, function(v)
+            ns.P.buttons.hover = v == "hover"
+            ns.ApplyAll()
+        end, { enableIf = Both(On, ns.HasAddonButtons) }))
 
     -- the whole map by situation
-    card = page:Add(1, UI.Card(page.content, L["Visibility"]))
-    g, s = Bind("visibility", "when")
+    card = page:Add(1, UI.Card(page.content, L["Map"]))
+    local g, s = Bind("visibility", "when")
     card:Add(UI.Segmented(card, L["Show the map"], {
         { "always", L["Always"] }, { "outCombat", L["Out of combat"] }, { "inCombat", L["In combat"] },
     }, g, s, { enableIf = On }))
@@ -427,17 +466,6 @@ local function BuildMap(container)
         { format = function(v) return ("%.1f s"):format(v) end, enableIf = situational }))
     g, s = Bind("visibility", "mouse")
     card:Add(UI.Check(card, L["Show it with the mouse over"], g, s, { enableIf = situational }))
-
-    card = page:Add(2, UI.Card(page.content, "TidyMap"))
-    card:Add(UI.Check(card, L["Minimap icon"], function() return not ns.db.icon.hide end, function(v)
-        ns.db.icon.hide = not v
-        ns.ApplyAll()
-    end))
-    card:Add(UI.Segmented(card, L["Language"], { { "enUS", "English" }, { "esES", "Español" } },
-        function() return ns.db.language or "enUS" end, function(v)
-            ns.SetLanguagePref(v)
-            Rebuild()
-        end))
 
     page:Layout()
 end
@@ -508,6 +536,7 @@ local function Build()
     win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("texts", L["Texts"], BuildTexts)
     win:AddNav("addons", L["Addons"], BuildAddons)
+    win:AddNav("visibility", L["Visibility"], BuildVisibility)
     win:AddNav("map", L["Map"], BuildMap)
     win:AddNav("profiles", L["Profiles"], BuildProfiles)
     UI.OnRefresh = function()

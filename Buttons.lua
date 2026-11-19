@@ -5,7 +5,7 @@
 --   · into the addon menu: AddButtonToCompartment + Hide (Blizzard's addon
 --     menu on the map collects them)
 --   · flat look: RemoveButtonBorder / RemoveButtonBackground
---   · Clean mode: ShowOnEnter (they show with the mouse over the map)
+--   · Clean mode or "on hover": ShowOnEnter (they show with the mouse over the map)
 --   · Lock icons: Lock / Unlock
 -- Whatever TidyMap changed is undone when it is turned off or unchecked.
 -------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ local function ApplyButton(dbi, name)
         end
     end
 
-    if on and ns.P.clean then
+    if on and (ns.P.clean or ns.P.buttons.hover) then
         dbi:ShowOnEnter(name, true)
         hover[name] = true
     elseif hover[name] then

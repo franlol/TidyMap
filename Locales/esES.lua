@@ -123,7 +123,8 @@ ns.translations.esES = {
 
     -- Map
     ["Zoom"] = "Zoom",
-    ["Zoom buttons on hover"] = "Botones de zoom al pasar",
+    ["Zoom buttons"] = "Botones de zoom",
+    ["Parts"] = "Partes",
     ["Visibility"] = "Visibilidad",
     ["Show the map"] = "Mostrar el mapa",
     ["Always"] = "Siempre",
