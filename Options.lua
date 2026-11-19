@@ -279,6 +279,13 @@ local function TextCard(page, col, key, title)
             UI.RefreshAll()
         end, "danger", confirm = true },
     }, { enableIf = On }))
+    card:Add(UI.Buttons(card, {
+        { L["Reset this text"], function()
+            ns.P.texts[key] = ns.Copy(ns.defaults.texts[key])
+            ns.ApplyAll()
+            UI.RefreshAll()
+        end, "danger", confirm = true },
+    }, { enableIf = On }))
 end
 
 local function BuildTexts(container)

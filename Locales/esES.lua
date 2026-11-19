@@ -92,6 +92,7 @@ ns.translations.esES = {
     ["Shadow X"] = "Sombra X",
     ["Shadow Y"] = "Sombra Y",
     ["Use this style for all texts"] = "Usar este estilo en todos los textos",
+    ["Reset this text"] = "Restablecer este texto",
     ["Outline"] = "Contorno",
     ["Thin"] = "Fino",
     ["Thick"] = "Grueso",
