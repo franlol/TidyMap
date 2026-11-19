@@ -5,7 +5,7 @@
 -- map fades out completely and stops taking clicks. No partial opacity:
 -- the game draws the tracking icons at full strength whatever the map's
 -- opacity. The mouse over it can bring it back. Only the opacity of
--- Blizzard's minimap group (icons, header) and TidyMap's map frame changes;
+-- Blizzard's minimap group changes (icons, header, TidyMap's map frame);
 -- combat comes from PLAYER_REGEN_DISABLED / ENABLED, like Blizzard's frames.
 -------------------------------------------------------------------------------
 
@@ -50,12 +50,10 @@ local function SetMapMouse(on)
     mouseOff = not on
 end
 
--- Blizzard's group (icons, header) and TidyMap's frame holding the map
+-- Blizzard's group: icons, header, and TidyMap's frame holding the map
 local function Set(a)
     alpha = a
     MinimapCluster:SetAlpha(a)
-    local h = ns.MapHolder()
-    if h then h:SetAlpha(a) end
     SetMapMouse(a > 0.01)
 end
 

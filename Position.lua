@@ -1,8 +1,9 @@
 -------------------------------------------------------------------------------
 -- TidyMap - The map's place and size, TidyMap's own (not Edit Mode)
 --
--- While TidyMap is on, the minimap lives in TidyMap's own frame on the
--- screen (Minimap:SetParent: the map is not a protected frame, and Blizzard
+-- While TidyMap is on, the minimap lives in TidyMap's own frame, inside
+-- Blizzard's minimap group but anchored to the screen (Minimap:SetParent:
+-- the map is not a protected frame, and Blizzard
 -- never anchors it again). Its place and size are saved in the profile.
 -- The first time, they are taken from where Edit Mode had it, so nothing
 -- jumps. Blizzard's icons follow the map (Elements.lua places them on its
@@ -74,7 +75,8 @@ end
 local function Place()
     local p = ns.P.position
     local f = p.size / 100
-    holder:SetScale(f)
+    -- the holder sits in Blizzard's group, which may have its own scale
+    holder:SetScale(f * UIParent:GetEffectiveScale() / MinimapCluster:GetEffectiveScale())
     holder:SetSize(Minimap:GetSize())
     holder:ClearAllPoints()
     holder:SetPoint("CENTER", UIParent, "CENTER", p.x / f, p.y / f)
@@ -89,8 +91,6 @@ local function Apply()
         return
     end
     if not ns.P.position then TakeFromBlizzard() end
-    holder:SetFrameStrata(MinimapCluster:GetFrameStrata())
-    holder:SetFrameLevel(MinimapCluster:GetFrameLevel())
     holder:Show()
     if not inHolder then
         Minimap:SetParent(holder)
@@ -275,7 +275,11 @@ function ns.SetMovingMap(on)
 end
 
 local function Start()
-    holder = CreateFrame("Frame", nil, UIParent)
+    -- inside Blizzard's minimap group (MinimapCluster), not on UIParent: the
+    -- group is a toplevel frame that the game raises when clicked, and the
+    -- map has to go up with its icons (on its own, the icons ended up under
+    -- it). It also hides and fades with the group, as the map always did.
+    holder = CreateFrame("Frame", nil, MinimapCluster)
     holder:SetClampedToScreen(true)
     holder:Hide()
     -- the screen's size changes (resolution, UI scale): the grid follows
