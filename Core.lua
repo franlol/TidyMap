@@ -58,7 +58,9 @@ ns.defaults = {
     visibility = { when = "always", opacity = 100, faded = 0, fade = 0.3, mouse = true },
     -- Blizzard's icons: shown / on hover / hidden, angle on the edge
     -- (0 right, 90 up), distance past the edge (px), look (Blizzard's art
-    -- or flat) and size (% of Blizzard's)
+    -- or flat) and size (% of Blizzard's). The texts (zone, clock,
+    -- coordinates) sit at a point of the map instead: point, x, y (set from
+    -- their angle and distance the first time)
     -- The flat look of each icon: padding around it, border size, border
     -- color (the map's, or its own) and background color.
     elements = {

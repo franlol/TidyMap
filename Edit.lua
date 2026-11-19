@@ -40,7 +40,8 @@ local function Overlay(key)
         for _, x in ipairs(ns.ELEMENTS) do if x.key == key then e = x end end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:SetText(L[e.name], 1, 1, 1)
-        GameTooltip:AddLine(L["Drag along the edge · Click for its settings"], 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(ns.IsTextElement(key) and L["Drag to move · Click for its settings"]
+            or L["Drag along the edge · Click for its settings"], 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     o:SetScript("OnLeave", function(self)
@@ -49,8 +50,22 @@ local function Overlay(key)
     end)
     o:SetScript("OnDragStart", function(self)
         GameTooltip:Hide()
+        local s = ns.P.elements[key]
+        -- texts move freely (their offset from the anchor), icons along the edge
+        if ns.IsTextElement(key) and s.point then
+            local scale = Minimap:GetEffectiveScale()
+            local cx, cy = GetCursorPosition()
+            local x0, y0 = s.x - cx / scale, s.y - cy / scale
+            self:SetScript("OnUpdate", function()
+                local mx, my = GetCursorPosition()
+                s.x = math.floor(x0 + mx / scale + 0.5)
+                s.y = math.floor(y0 + my / scale + 0.5)
+                ns.ApplyElement(key)
+            end)
+            return
+        end
         self:SetScript("OnUpdate", function()
-            ns.P.elements[key].angle = CursorAngle()
+            s.angle = CursorAngle()
             ns.ApplyElement(key)
         end)
     end)

@@ -255,14 +255,49 @@ local function SetMouse(e, f, on)
     end
 end
 
--- The icon's center on the edge, in its own units (it can have another
--- scale than the map: Edit Mode sizes them apart)
+-- The 9 anchor points: their side on x and y (-1, 0, 1)
+local SIDES = {
+    TOPLEFT = { -1, 1 }, TOP = { 0, 1 }, TOPRIGHT = { 1, 1 },
+    LEFT = { -1, 0 }, CENTER = { 0, 0 }, RIGHT = { 1, 0 },
+    BOTTOMLEFT = { -1, -1 }, BOTTOM = { 0, -1 }, BOTTOMRIGHT = { 1, -1 },
+}
+-- the point nearest an angle on the edge (0 right, 90 up)
+local AROUND = { "RIGHT", "TOPRIGHT", "TOP", "TOPLEFT", "LEFT", "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT" }
+
+function ns.IsTextElement(key)
+    local e = BY_KEY[key]
+    return e and e.text ~= nil
+end
+
+-- A text with no anchor yet (defaults, older profiles): its place on the
+-- edge becomes the anchor nearest it and the offset that keeps it there
+local function ToAnchor(s, f, cx, cy, k)
+    local point = AROUND[math.floor(((s.angle % 360) + 22.5) / 45) % 8 + 1]
+    local side = SIDES[point]
+    local w, h = f:GetWidth() / k, f:GetHeight() / k
+    s.point = point
+    s.x = math.floor(cx - side[1] * Minimap:GetWidth() / 2 + side[1] * w / 2 + 0.5)
+    s.y = math.floor(cy - side[2] * Minimap:GetHeight() / 2 + side[2] * h / 2 + 0.5)
+end
+
+-- Icons: their center on the edge. Texts: an anchor point of the map and
+-- an offset. In the frame's own units (it can have another scale than the
+-- map: Edit Mode sizes them apart)
 local function Place(e, f)
     local s = ns.P.elements[e.key]
-    local shape = Flaty.Rounded(ns.P.corners)
-    local x, y = Flaty.ShapeEdge(shape, s.angle, Minimap:GetWidth() / 2, Minimap:GetHeight() / 2, s.dist)
     local k = Minimap:GetEffectiveScale() / f:GetEffectiveScale()
     f:ClearAllPoints()
+    if e.text and not s.point then
+        local shape = Flaty.Rounded(ns.P.corners)
+        local x, y = Flaty.ShapeEdge(shape, s.angle, Minimap:GetWidth() / 2, Minimap:GetHeight() / 2, s.dist)
+        ToAnchor(s, f, x, y, k)
+    end
+    if e.text then
+        f:SetPoint(s.point, Minimap, s.point, s.x * k, s.y * k)
+        return
+    end
+    local shape = Flaty.Rounded(ns.P.corners)
+    local x, y = Flaty.ShapeEdge(shape, s.angle, Minimap:GetWidth() / 2, Minimap:GetHeight() / 2, s.dist)
     f:SetPoint("CENTER", Minimap, "CENTER", x * k, y * k)
 end
 

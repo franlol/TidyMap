@@ -120,6 +120,30 @@ local function PlateRows(card, cfg, enableIf)
     card:Add(UI.Swatch(card, L["Background color"], function() return cfg().bgColor end, Apply,
         { alpha = true, enableIf = enableIf }))
 end
+
+-- Where a text sits: a point of the map and an offset from it
+local POINTS = function()
+    return {
+        { "TOPLEFT", L["Top left"] }, { "TOP", L["Top"] }, { "TOPRIGHT", L["Top right"] },
+        { "LEFT", L["Left"] }, { "CENTER", L["Center"] }, { "RIGHT", L["Right"] },
+        { "BOTTOMLEFT", L["Bottom left"] }, { "BOTTOM", L["Bottom"] }, { "BOTTOMRIGHT", L["Bottom right"] },
+    }
+end
+local function AnchorRows(card, cfg, key, enableIf, showIf)
+    local function Get(k, d) return function() return cfg()[k] or d end end
+    local function Set(k) return function(v) cfg()[k] = v ns.ApplyElement(key()) end end
+    -- a new point starts with no offset: the text goes right to it
+    card:Add(UI.Dropdown(card, L["Anchor"], POINTS, Get("point", "CENTER"), function(v)
+        local c = cfg()
+        c.point, c.x, c.y = v, 0, 0
+        ns.ApplyElement(key())
+        UI.RefreshAll()
+    end, { enableIf = enableIf, showIf = showIf }))
+    card:Add(UI.Slider(card, "X", -150, 150, 1, Get("x", 0), Set("x"),
+        { format = UI.px, enableIf = enableIf, showIf = showIf }))
+    card:Add(UI.Slider(card, "Y", -150, 150, 1, Get("y", 0), Set("y"),
+        { format = UI.px, enableIf = enableIf, showIf = showIf }))
+end
 local function ElementName(key)
     for _, e in ipairs(ns.ELEMENTS) do
         if e.key == key then return L[e.name] end
@@ -174,20 +198,24 @@ local function BuildIcons(container)
         Sel().size = v
         ApplySel()
     end, { format = Pct, enableIf = placed }))
+    -- icons on the edge (angle, distance); texts at a point of the map
+    local isText = function() return ns.IsTextElement(ns.selected) end
+    local isIcon = function() return not isText() end
     card:Add(UI.Slider(card, L["Angle"], 0, 359, 1, function() return Sel().angle end, function(v)
         Sel().angle = v
         ApplySel()
-    end, { format = function(v) return ("%d°"):format(v) end, enableIf = placed }))
+    end, { format = function(v) return ("%d°"):format(v) end, enableIf = placed, showIf = isIcon }))
     card:Add(UI.Slider(card, L["Distance"], -20, 40, 1, function() return Sel().dist end, function(v)
         Sel().dist = v
         ApplySel()
-    end, { format = UI.px, enableIf = placed }))
+    end, { format = UI.px, enableIf = placed, showIf = isIcon }))
+    AnchorRows(card, Sel, function() return ns.selected end, placed, isText)
     card:Add(UI.Heading(card, L["Flat look"]))
     PlateRows(card, Sel, Both(placed, function() return Sel().look == "flat" end))
     card:Add(UI.Buttons(card, {
         { L["Reset this icon"], function()
             local d = ns.defaults.elements[ns.selected]
-            for _, k in ipairs({ "angle", "dist", "look", "size", "pad", "edge", "mapColor", "mapCorners", "corners" }) do
+            for _, k in ipairs({ "angle", "dist", "point", "x", "y", "look", "size", "pad", "edge", "mapColor", "mapCorners", "corners" }) do
                 Sel()[k] = d[k]
             end
             for _, k in ipairs({ "edgeColor", "bgColor" }) do
@@ -266,17 +294,10 @@ local function TextCard(page, col, key, title)
             { alpha = true, enableIf = shown }))
     end
 
-    -- where it sits on the edge (the same settings as on the Icons page)
+    -- where it sits (the same settings as on the Icons page)
     local function E() return ns.P.elements[key] end
     card:Add(UI.Heading(card, L["Position"]))
-    card:Add(UI.Slider(card, L["Angle"], 0, 359, 1, function() return E().angle end, function(v)
-        E().angle = v
-        ns.ApplyElement(key)
-    end, { format = function(v) return ("%d°"):format(v) end, enableIf = shown }))
-    card:Add(UI.Slider(card, L["Distance"], -20, 40, 1, function() return E().dist end, function(v)
-        E().dist = v
-        ns.ApplyElement(key)
-    end, { format = UI.px, enableIf = shown }))
+    AnchorRows(card, E, function() return key end, shown)
 
     -- its background: the icon's flat plate (the same settings as on the
     -- Icons page), or Blizzard's own art
