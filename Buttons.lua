@@ -25,17 +25,29 @@ local function Locked()
     return ns.db.lockedButtons
 end
 
+-- Addons already in the addon menu on their own (AddonCompartmentFunc in
+-- their TOC; the button carries the addon's name): adding the button too
+-- would list them twice, so only the map button is hidden
+local function HasOwnEntry(name)
+    if not C_AddOns.DoesAddOnExist(name) then return false end
+    local func = C_AddOns.GetAddOnMetadata(name, "AddonCompartmentFunc")
+    return func ~= nil and func ~= ""
+end
+
 local function ApplyButton(dbi, name)
     if not dbi:GetMinimapButton(name) then return end
     local on = On()
     local P = ns.P.buttons
 
-    if on and P.menu[name] and dbi.AddButtonToCompartment then
+    if on and P.menu[name] and HasOwnEntry(name) then
+        dbi:Hide(name)
+        inMenu[name] = "own"
+    elseif on and P.menu[name] and dbi.AddButtonToCompartment then
         dbi:AddButtonToCompartment(name)
         dbi:Hide(name)
         inMenu[name] = true
     elseif inMenu[name] then
-        dbi:RemoveButtonFromCompartment(name)
+        if inMenu[name] == true then dbi:RemoveButtonFromCompartment(name) end
         dbi:Refresh(name)   -- shown again, unless its addon hides it
         inMenu[name] = nil
     end
