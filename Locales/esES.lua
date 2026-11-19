@@ -80,6 +80,8 @@ ns.translations.esES = {
     ["Drag any icon on the map, or click one for its settings."] =
         "Arrastra cualquier icono del mapa o haz clic en uno para sus opciones.",
     ["Lock buttons"] = "Bloquear botones",
+    ["Move map"] = "Mover mapa",
+    ["Opens Edit Mode: drag the minimap there."] = "Abre el Modo edición: arrastra ahí el minimapa.",
     ["Border color like the map"] = "Color de borde como el mapa",
     ["Border color"] = "Color del borde",
     ["All icons"] = "Todos los iconos",

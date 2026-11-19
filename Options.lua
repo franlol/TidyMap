@@ -566,6 +566,18 @@ local function Build()
         ns.ApplyAll()
         UI.RefreshAll()
     end, function() return ns.unlocked end, L["Drag any icon on the map, or click one for its settings."])
+    -- "Move map": the map's place belongs to Blizzard's Edit Mode (saved in
+    -- its layout), so this opens it as Blizzard's own buttons do (raid
+    -- frames, damage meter). Not in combat; the window closes to free the map.
+    win:AddHeaderButton(L["Move map"], function()
+        if InCombatLockdown() then
+            UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1, 0.1, 0.1)
+            return
+        end
+        if not (EditModeManagerFrame and EditModeManagerFrame:CanEnterEditMode()) then return end
+        win:Hide()
+        ShowUIPanel(EditModeManagerFrame)
+    end, nil, L["Opens Edit Mode: drag the minimap there."])
     win:Select("look")
 end
 
