@@ -564,6 +564,15 @@ end
 local function Build()
     win = UI.Window({ name = "TidyMapOptions", title = "TidyMap", version = ns.version,
         logo = "Interface\\AddOns\\TidyMap\\Media\\Icon", width = 640, height = 470, navWidth = 110 })
+    -- closing the window ends "Move map" and "Unlock icons" (their boxes
+    -- would cover the map and its buttons, the TidyMap icon too)
+    win:HookScript("OnHide", function()
+        if ns.movingMap then ns.SetMovingMap(false) end
+        if ns.unlocked then
+            ns.unlocked = false
+            ns.ApplyAll()
+        end
+    end)
     win:AddNav("look", L["Look"], BuildLook)
     win:AddNav("icons", L["Icons"], BuildIcons)
     win:AddNav("texts", L["Texts"], BuildTexts)
@@ -577,15 +586,15 @@ local function Build()
         win:SetStatus(other and ("|cffff7359" .. L["%s is also loaded: both change the minimap. Disable one of them and reload."]:format(other) .. "|r") or "")
     end
     -- "Unlock icons" (window header, on every page): outlines on the map's
-    -- icons, to drag them or click them; locked again at the next login.
+    -- icons, to drag them or click them; locked again when the window closes.
     -- Other addons' buttons have their own lock (Addons page)
     win:AddHeaderButton(L["Unlock icons"], function()
         ns.unlocked = not ns.unlocked
         ns.ApplyAll()
         UI.RefreshAll()
     end, function() return ns.unlocked end, L["Drag any icon on the map, or click one for its settings."])
-    -- "Move map": a box over the map to drag it (Position.lua); until
-    -- pressed again or the next login
+    -- "Move map": a box over the map to drag it (Position.lua); until the
+    -- window closes
     win:AddHeaderButton(L["Move map"], function()
         ns.SetMovingMap(not ns.movingMap)
         UI.RefreshAll()

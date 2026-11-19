@@ -94,7 +94,7 @@ function ns.OnElementPlaced(key, f)
     o:Show()
 end
 
--- Unlocked: the outlines stay (window open or not) until locked again or the
+-- Unlocked: the outlines stay until locked again, the window closes or the
 -- next login (unlocked is never saved)
 local function ApplyLock()
     ns.SetEditing(ns.P.enabled and ns.unlocked)

@@ -25,7 +25,7 @@ local home            -- Blizzard's own: parent, points, scale, level of the map
 local inHolder = false
 local mover, grid
 
-ns.movingMap = false  -- the box is shown (this session only)
+ns.movingMap = false  -- the box is shown (until the window closes)
 
 local function On() return ns.P and ns.P.enabled end
 
