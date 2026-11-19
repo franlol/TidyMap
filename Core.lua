@@ -53,9 +53,9 @@ ns.defaults = {
     zoom = { mode = "out", delay = 10, buttons = true },
     clean = false,      -- every shown icon only on hover
     -- the whole minimap by situation: always, only out of combat or only in
-    -- combat; its opacity when shown and when faded, fade time, and whether
-    -- the mouse over it brings it back
-    visibility = { when = "always", opacity = 100, faded = 0, fade = 0.3, mouse = true },
+    -- combat (hidden: fully gone, as the tracking icons can't fade), fade
+    -- time, and whether the mouse over it brings it back
+    visibility = { when = "always", fade = 0.3, mouse = true },
     -- Blizzard's icons: shown / on hover / hidden, angle on the edge
     -- (0 right, 90 up), distance past the edge (px), look (Blizzard's art
     -- or flat) and size (% of Blizzard's). The texts (zone, clock,
@@ -205,6 +205,10 @@ local function Migrate(p)
             if type(h) == "table" and type(e) == "table" and h.mode then e.mode = h.mode end
         end
         p.header = nil
+    end
+    -- the map's opacities are gone (hidden is fully hidden)
+    if type(p.visibility) == "table" then
+        p.visibility.opacity, p.visibility.faded = nil, nil
     end
     -- the zoom on / off became a choice
     if type(p.zoom) == "table" and p.zoom.auto ~= nil then

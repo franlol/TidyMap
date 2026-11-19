@@ -131,7 +131,6 @@ ns.translations.esES = {
     ["Always"] = "Siempre",
     ["Out of combat"] = "Fuera de combate",
     ["In combat"] = "En combate",
-    ["Opacity"] = "Opacidad",
     ["Hidden in combat"] = "Oculto en combate",
     ["Hidden out of combat"] = "Oculto fuera de combate",
     ["Fade time"] = "Tiempo de fundido",

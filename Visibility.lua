@@ -2,8 +2,9 @@
 -- TidyMap - The whole minimap by situation
 --
 -- Always, only out of combat, or only in combat. Out of its situation the
--- map fades (to the faded opacity, 0 = gone) and, fully gone, stops taking
--- clicks. The mouse over it can bring it back. Only the opacity of
+-- map fades out completely and stops taking clicks. No partial opacity:
+-- the game draws the tracking icons at full strength whatever the map's
+-- opacity. The mouse over it can bring it back. Only the opacity of
 -- Blizzard's minimap group changes (map, icons, header and buttons with it);
 -- combat comes from PLAYER_REGEN_DISABLED / ENABLED, like Blizzard's frames.
 -------------------------------------------------------------------------------
@@ -20,17 +21,16 @@ local function On() return ns.P and ns.P.enabled end
 -- the opacity wanted now (0-1)
 local function Target()
     local v = ns.P.visibility
-    if ns.IsEditing() then return v.opacity / 100 end
+    if ns.IsEditing() then return 1 end
     local shown = v.when == "always"
         or (v.when == "outCombat" and not inCombat)
         or (v.when == "inCombat" and inCombat)
     if not shown and v.mouse and MinimapCluster:IsMouseOver() then shown = true end
-    return (shown and v.opacity or v.faded) / 100
+    return shown and 1 or 0
 end
 
--- Fully gone: no clicks, and the map itself hidden. The game draws the
--- map's dots (nodes, quests, party) apart, at full strength whatever the
--- opacity; only hiding the map takes them away.
+-- Fully gone: no clicks, and the map itself hidden (only that takes the
+-- tracking icons away)
 local function SetMapMouse(on)
     if on == not mouseOff then return end
     Minimap:EnableMouse(on)

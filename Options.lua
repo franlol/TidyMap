@@ -458,14 +458,11 @@ local function BuildVisibility(container)
     card:Add(UI.Segmented(card, L["Hide the map"], {
         { "always", L["Never"] }, { "outCombat", L["In combat"] }, { "inCombat", L["Out of combat"] },
     }, g, s, { enableIf = On }))
-    g, s = Bind("visibility", "opacity")
-    card:Add(UI.Slider(card, L["Opacity"], 0, 100, 5, g, s, { format = Pct, enableIf = On }))
-    -- the other situation: the map hidden (faded to its opacity there),
-    -- the fade between both, and the mouse bringing it back
+    -- the other situation: the map hidden (fully: the game draws the
+    -- tracking icons at full strength whatever the map's opacity), the
+    -- fade between both, and the mouse bringing it back
     local situational = Both(On, function() return ns.P.visibility.when ~= "always" end)
     local hidden = card:Add(UI.Heading(card, L["Hidden"], { showIf = situational }))
-    g, s = Bind("visibility", "faded")
-    card:Add(UI.Slider(card, L["Opacity"], 0, 90, 5, g, s, { format = Pct, enableIf = situational, showIf = situational }))
     g, s = Bind("visibility", "fade")
     card:Add(UI.Slider(card, L["Fade time"], 0, 2, 0.1, g, s,
         { format = function(v) return ("%.1f s"):format(v) end, enableIf = situational, showIf = situational }))
