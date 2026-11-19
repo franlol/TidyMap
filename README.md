@@ -24,8 +24,9 @@ A clean, shaped minimap for WoW Forever, built with
 Move and resize the minimap with the game's **Edit Mode**: TidyMap only changes
 how it looks. Clicking the map still pings, as always.
 
-Open the options with `/tidymap`, from the addon menu on the minimap, or with
-the TidyMap icon (it can be hidden in the options).
+Open the options with `/tidymap` or with the TidyMap icon on the minimap. The icon
+is a LibDBIcon button like other addons': it can move into the addon menu
+(Addons page) or be hidden.
 
 ## License
 

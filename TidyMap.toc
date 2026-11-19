@@ -8,11 +8,11 @@
 ## Version: @project-version@
 ## IconTexture: Interface\AddOns\TidyMap\Media\Icon
 ## SavedVariables: TidyMapDB
-## AddonCompartmentFunc: TidyMap_OnCompartmentClick
-## AddonCompartmentFuncOnEnter: TidyMap_OnCompartmentEnter
-## AddonCompartmentFuncOnLeave: TidyMap_OnCompartmentLeave
 
 Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 Libs\LibFlatyUI-1.0\LibFlatyUI-1.0.lua
 
 Locales\Locale.lua
@@ -20,9 +20,9 @@ Locales\esES.lua
 Core.lua
 Map.lua
 Elements.lua
+Icon.lua
 Buttons.lua
 Edit.lua
 Zoom.lua
 Visibility.lua
-Icon.lua
 Options.lua

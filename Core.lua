@@ -3,7 +3,7 @@
 --
 -- TidyMapDB = {
 --     language  = "enUS" | "esES",
---     icon      = { hide, angle },          (account-wide)
+--     icon      = { hide, minimapPos, lock },  (account-wide, LibDBIcon's)
 --     profiles  = { [name] = settings },
 --     profileOf = { [character] = name },
 -- }
@@ -89,7 +89,7 @@ ns.defaults = {
 ns.unlocked = false
 
 local ACCOUNT = {
-    icon = { hide = false, angle = 225 },
+    icon = { hide = false, minimapPos = 225 },
 }
 
 -- Styles: one click sets the whole look (corners, border, glow)
@@ -305,21 +305,7 @@ function ns.SetLanguagePref(lang)
 end
 
 -------------------------------------------------------------------------------
--- Opening the options: /tidymap, the addon compartment, the minimap icon
+-- Opening the options: /tidymap, or the minimap icon (Icon.lua)
 -------------------------------------------------------------------------------
 SLASH_TIDYMAP1 = "/tidymap"
 SlashCmdList.TIDYMAP = function() ns.ToggleOptions() end
-
-function ns.Tooltip(owner, anchor)
-    GameTooltip:SetOwner(owner, anchor or "ANCHOR_LEFT")
-    GameTooltip:AddDoubleLine("TidyMap", ns.version, ns.ACCENT[1], ns.ACCENT[2], ns.ACCENT[3], 0.5, 0.5, 0.5)
-    GameTooltip:AddDoubleLine(L["Profile"], ns.profileName or "?", 0.7, 0.7, 0.7, 1, 1, 1)
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine(L["Click"], L["Open the options"], 1, 0.82, 0, 1, 1, 1)
-    GameTooltip:Show()
-end
-
--- Named in the TOC (AddonCompartmentFunc...)
-function TidyMap_OnCompartmentClick() ns.ToggleOptions() end
-function TidyMap_OnCompartmentEnter(_, button) ns.Tooltip(button) end
-function TidyMap_OnCompartmentLeave() GameTooltip:Hide() end
