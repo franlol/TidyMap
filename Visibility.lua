@@ -28,10 +28,14 @@ local function Target()
     return (shown and v.opacity or v.faded) / 100
 end
 
+-- Fully gone: no clicks, and the map itself hidden. The game draws the
+-- map's dots (nodes, quests, party) apart, at full strength whatever the
+-- opacity; only hiding the map takes them away.
 local function SetMapMouse(on)
     if on == not mouseOff then return end
     Minimap:EnableMouse(on)
     Minimap:EnableMouseWheel(on)
+    Minimap:SetShown(on)
     mouseOff = not on
 end
 
