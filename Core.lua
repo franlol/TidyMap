@@ -31,9 +31,8 @@ local function Plate(t)
     t.bgColor = t.bgColor or C(0.05, 0.05, 0.06, 0.9)
     return t
 end
-local function Icon(angle, dist, round)
-    return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100,
-        mapCorners = not round, corners = round and 100 or 0 })
+local function Icon(angle, dist)
+    return Plate({ mode = "show", angle = angle, dist = dist, look = "flat", size = 100 })
 end
 local function Piece(t)
     t.offset = t.offset or 0
@@ -65,7 +64,7 @@ ns.defaults = {
         tracking = Icon(138, 0),
         mail = Icon(162, 0),
         compartment = Icon(20, 0),
-        daynight = Icon(64, 0, true),   -- a round picture: a round plate
+        daynight = Icon(64, 0),
         coords = Icon(270, -14),
     },
     -- the texts on and around the map: one font, a size each
