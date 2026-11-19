@@ -457,7 +457,7 @@ local function BuildVisibility(container)
         { "always", L["Always"] }, { "outCombat", L["Out of combat"] }, { "inCombat", L["In combat"] },
     }, g, s, { enableIf = On }))
     g, s = Bind("visibility", "opacity")
-    card:Add(UI.Slider(card, L["Opacity"], 10, 100, 5, g, s, { format = Pct, enableIf = On }))
+    card:Add(UI.Slider(card, L["Opacity"], 0, 100, 5, g, s, { format = Pct, enableIf = On }))
     -- the other situation: the map hidden (faded to its opacity there),
     -- the fade between both, and the mouse bringing it back
     local situational = Both(On, function() return ns.P.visibility.when ~= "always" end)
