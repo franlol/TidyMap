@@ -5,6 +5,7 @@
 --   · into the addon menu: AddButtonToCompartment + Hide (Blizzard's addon
 --     menu on the map collects them)
 --   · flat look: RemoveButtonBorder / RemoveButtonBackground
+--   · size: SetButtonSize / SetButtonIcon (+ border and background scaled)
 --   · Clean mode or "on hover": ShowOnEnter (they show with the mouse over the map)
 --   · Lock buttons (own setting, apart from the header's Unlock icons): Lock / Unlock
 -- Whatever TidyMap changed is undone when it is turned off or unchecked.
@@ -22,7 +23,7 @@ end
 local function DBI() return LibStub("LibDBIcon-1.0", true) end
 
 -- what TidyMap changed, per button name (to undo only that)
-local inMenu, flat, hover = {}, {}, {}
+local inMenu, flat, hover, sized = {}, {}, {}, {}
 
 -- the buttons TidyMap locked: kept across sessions (LibDBIcon saves the lock
 -- in that addon's settings, so it would look like the addon's own)
@@ -54,28 +55,56 @@ local function ApplyButton(dbi, name)
         inMenu[name] = nil
     end
 
-    -- (older LibDBIcon copies, before about v55, have no border functions)
+    -- (older LibDBIcon copies, before about v55, have no border or size
+    -- functions). LibDBIcon's two layouts: with the addon menu, 31 px button,
+    -- 18 px icon centered, 50 px border, 24 px background centered; without,
+    -- 17 px icon at 7, -6, 53 px border, 20 px background at 7, -5. Size
+    -- (%) scales all of it.
     if dbi.RemoveButtonBorder then
+        local main = dbi:IsButtonCompartmentAvailable()
+        local f = on and dbi.SetButtonSize and (P.size or 100) / 100 or 1
         if on and P.flat then
             dbi:RemoveButtonBorder(name)
             if P.border then
                 -- a black rounded square borderSize px past the icon on
-                -- every side, behind it (LibDBIcon's icon: 18 px centered,
-                -- or 17 px at 7, -6)
+                -- every side, behind it
                 local tex, n = BlackTexture(P.borderCorners), P.borderSize or 1
-                if dbi:IsButtonCompartmentAvailable() then
-                    dbi:SetButtonBackground(name, tex, 18 + 2 * n, "CENTER", 0, 0)
+                if main then
+                    dbi:SetButtonBackground(name, tex, 18 * f + 2 * n, "CENTER", 0, 0)
                 else
-                    dbi:SetButtonBackground(name, tex, 17 + 2 * n, "TOPLEFT", 7 - n, -6 + n)
+                    dbi:SetButtonBackground(name, tex, 17 * f + 2 * n, "TOPLEFT", 7 * f - n, -6 * f + n)
                 end
             else
                 dbi:RemoveButtonBackground(name)
             end
             flat[name] = true
+        elseif f ~= 1 then
+            -- round look, scaled
+            dbi:SetButtonBorder(name, nil, (main and 50 or 53) * f, "TOPLEFT", 0, 0)
+            if main then
+                dbi:SetButtonBackground(name, nil, 24 * f, "CENTER", 0, 0)
+            else
+                dbi:SetButtonBackground(name, nil, 20 * f, "TOPLEFT", 7 * f, -5 * f)
+            end
+            flat[name] = true   -- (to undo)
         elseif flat[name] then
             dbi:ResetButtonBorder(name)
             dbi:ResetButtonBackground(name)
             flat[name] = nil
+        end
+
+        if f ~= 1 then
+            dbi:SetButtonSize(name, 31 * f)
+            if main then
+                dbi:SetButtonIcon(name, nil, 18 * f, "CENTER", 0, 0)
+            else
+                dbi:SetButtonIcon(name, nil, 17 * f, "TOPLEFT", 7 * f, -6 * f)
+            end
+            sized[name] = true
+        elseif sized[name] then
+            dbi:ResetButtonSize(name)
+            dbi:ResetButtonIcon(name)
+            sized[name] = nil
         end
     end
 
@@ -127,6 +156,10 @@ function ns.HasAddonButtons() return DBI() ~= nil end
 function ns.CanFlattenButtons()
     local dbi = DBI()
     return dbi and dbi.RemoveButtonBorder and true or false
+end
+function ns.CanSizeButtons()
+    local dbi = DBI()
+    return dbi and dbi.SetButtonSize and true or false
 end
 
 -- New buttons (addons that load later) get the same treatment

@@ -334,7 +334,9 @@ local function BuildAddons(container)
     local has = Both(On, ns.HasAddonButtons)
 
     local card = page:Add(1, UI.Card(page.content, L["Addon buttons"]))
-    local g, s = Bind("buttons", "flat")
+    local g, s = Bind("buttons", "size")
+    card:Add(UI.Slider(card, L["Size"], 50, 200, 5, g, s, { format = Pct, enableIf = Both(has, ns.CanSizeButtons) }))
+    g, s = Bind("buttons", "flat")
     card:Add(UI.Check(card, L["Flat look"], g, s, { enableIf = Both(has, ns.CanFlattenButtons),
         tip = L["No round border or background."] }))
     g, s = Bind("buttons", "border")
