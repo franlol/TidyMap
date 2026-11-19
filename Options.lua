@@ -453,8 +453,10 @@ local function BuildVisibility(container)
     -- the whole map by situation
     card = page:Add(1, UI.Card(page.content, L["Map"]))
     local g, s = Bind("visibility", "when")
-    card:Add(UI.Segmented(card, L["Show the map"], {
-        { "always", L["Always"] }, { "outCombat", L["Out of combat"] }, { "inCombat", L["In combat"] },
+    -- asked as when it hides (saved as when it shows: outCombat = hidden in
+    -- combat)
+    card:Add(UI.Segmented(card, L["Hide the map"], {
+        { "always", L["Never"] }, { "outCombat", L["In combat"] }, { "inCombat", L["Out of combat"] },
     }, g, s, { enableIf = On }))
     g, s = Bind("visibility", "opacity")
     card:Add(UI.Slider(card, L["Opacity"], 0, 100, 5, g, s, { format = Pct, enableIf = On }))
