@@ -109,12 +109,12 @@ local function PlateRows(card, cfg, enableIf)
     local function Get(k) return function() return cfg()[k] end end
     local function Set(k) return function(v) cfg()[k] = v ns.ApplyAll() end end
     card:Add(UI.Slider(card, L["Padding"], -10, 10, 1, Get("pad"), Set("pad"), { format = UI.px, enableIf = enableIf }))
-    card:Add(UI.Check(card, L["Map's corners"], Get("mapCorners"), Set("mapCorners"), { enableIf = enableIf }))
+    card:Add(UI.Check(card, L["Corners like the map"], Get("mapCorners"), Set("mapCorners"), { enableIf = enableIf }))
     card:Add(UI.Slider(card, L["Corners"], 0, 100, 1, Get("corners"), Set("corners"),
         { sub = true, format = Pct, enableIf = Both(enableIf, function() return not cfg().mapCorners end) }))
     card:Add(UI.Slider(card, L["Border"], 0, 4, 1, Get("edge"), Set("edge"), { format = UI.px, enableIf = enableIf }))
     local hasEdge = Both(enableIf, function() return cfg().edge > 0 end)
-    card:Add(UI.Check(card, L["Map's border color"], Get("mapColor"), Set("mapColor"), { sub = true, enableIf = hasEdge }))
+    card:Add(UI.Check(card, L["Border color like the map"], Get("mapColor"), Set("mapColor"), { sub = true, enableIf = hasEdge }))
     card:Add(UI.Swatch(card, L["Border color"], function() return cfg().edgeColor end, Apply,
         { alpha = true, sub = true, enableIf = Both(hasEdge, function() return not cfg().mapColor end) }))
     card:Add(UI.Swatch(card, L["Background color"], function() return cfg().bgColor end, Apply,
