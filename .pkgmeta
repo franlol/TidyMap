@@ -13,3 +13,6 @@ ignore:
   - README.md
   - screenshots
   - Libs/LibDataBroker-1.1/README.textile
+
+embedded-libraries:
+  - libflatyui-1-0

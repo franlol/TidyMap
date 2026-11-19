@@ -4,6 +4,7 @@
 ## Notes-esES: Un minimapa limpio y con forma: cuadrado, redondo o redondeado, con borde plano y brillo.
 ## Notes-esMX: Un minimapa limpio y con forma: cuadrado, redondo o redondeado, con borde plano y brillo.
 ## Author: franlol
+## X-Curse-Project-ID: 1817098
 ## X-License: MIT
 ## Version: @project-version@
 ## IconTexture: Interface\AddOns\TidyMap\Media\Icon
