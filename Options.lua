@@ -458,14 +458,27 @@ local function BuildVisibility(container)
     }, g, s, { enableIf = On }))
     g, s = Bind("visibility", "opacity")
     card:Add(UI.Slider(card, L["Opacity"], 10, 100, 5, g, s, { format = Pct, enableIf = On }))
+    -- the other situation: the map hidden (faded to its opacity there),
+    -- the fade between both, and the mouse bringing it back
     local situational = Both(On, function() return ns.P.visibility.when ~= "always" end)
+    local hidden = card:Add(UI.Heading(card, L["Hidden"], { showIf = situational }))
     g, s = Bind("visibility", "faded")
-    card:Add(UI.Slider(card, L["Faded opacity"], 0, 90, 5, g, s, { format = Pct, enableIf = situational }))
+    card:Add(UI.Slider(card, L["Opacity"], 0, 90, 5, g, s, { format = Pct, enableIf = situational, showIf = situational }))
     g, s = Bind("visibility", "fade")
     card:Add(UI.Slider(card, L["Fade time"], 0, 2, 0.1, g, s,
-        { format = function(v) return ("%.1f s"):format(v) end, enableIf = situational }))
+        { format = function(v) return ("%.1f s"):format(v) end, enableIf = situational, showIf = situational }))
     g, s = Bind("visibility", "mouse")
-    card:Add(UI.Check(card, L["Show it with the mouse over"], g, s, { enableIf = situational }))
+    card:Add(UI.Check(card, L["Show it with the mouse over"], g, s, { enableIf = situational, showIf = situational }))
+
+    -- the heading names the situation the map hides in
+    local paint = UI.OnRefresh
+    UI.OnRefresh = function()
+        if paint then paint() end
+        local when = ns.P.visibility.when
+        hidden.text:SetText(when == "outCombat" and L["Hidden in combat"]
+            or when == "inCombat" and L["Hidden out of combat"] or L["Hidden"])
+    end
+    UI.OnRefresh()
 
     page:Layout()
 end
