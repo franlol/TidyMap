@@ -44,7 +44,9 @@ ns.ELEMENTS = {
     { key = "mail", name = "Mail",
         frame = function() return MinimapCluster.IndicatorFrame end,
         buttons = function(f) return { f.MailFrame } end,
-        plateOn = function(f) return f.MailFrame end },
+        plateOn = function(f) return f.MailFrame end,
+        -- the envelope picture is smaller than its frame, in its corner
+        plateFit = function(f) return f.MailFrame and f.MailFrame.MailIcon end },
     { key = "compartment", name = "Addon menu",
         frame = function() return AddonCompartmentFrame end },
     { key = "daynight", name = "Day / night",
@@ -127,7 +129,9 @@ local function Decor(e, f, shown)
 end
 
 local function PaintPlate(e, f, flat)
-    -- some icons draw on a part of their frame (mail: the envelope)
+    -- some icons draw on a part of their frame (mail: the envelope), and
+    -- fit the plate to their picture
+    local fit = e.plateFit and e.plateFit(f)
     f = e.plateOn and e.plateOn(f) or f
     if not f then return end
     local p = plates[f]
@@ -150,8 +154,9 @@ local function PaintPlate(e, f, flat)
         end
         w, h, anchor = tw + 12, (text:GetStringHeight() or 10) + 6, text
     else
-        local fw, fh = f:GetSize()
-        w, h, anchor = fw + 4, fh + 4, f
+        local box = fit or f
+        local fw, fh = box:GetSize()
+        w, h, anchor = fw + 4, fh + 4, box
     end
     local mask = Flaty.GetShape(Flaty.Rounded(ns.P.corners)).mask
     p.bg:SetTexture(mask)
